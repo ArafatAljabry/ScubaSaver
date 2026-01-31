@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "Perception/PawnSensingComponent.h"
 #include "BagCharacter.generated.h"
@@ -28,7 +29,23 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
+protected:
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="variables")
+	float speed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "variables")
+	float damage;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* BoxCollider;
+
+
+public:
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
+
+
 
 };

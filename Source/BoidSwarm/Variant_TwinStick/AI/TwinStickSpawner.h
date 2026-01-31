@@ -60,6 +60,10 @@ public:
 	/** Constructor */
 	ATwinStickSpawner();
 
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool bCanSpawn = false;
+
 protected:
 
 	/** Gameplay initialization */

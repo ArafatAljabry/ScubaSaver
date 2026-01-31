@@ -66,25 +66,29 @@ void ATwinStickSpawner::SpawnNPCGroup()
 
 void ATwinStickSpawner::SpawnNPC()
 {
-	FTransform SpawnTransform;
-
-	// find a random point around the spawner
-	FVector SpawnLoc;
-	if (UNavigationSystemV1::K2_GetRandomReachablePointInRadius(GetWorld(), GetActorLocation(), SpawnLoc, SpawnRadius, NavData))
+	if (bCanSpawn)
 	{
-		SpawnTransform.SetLocation(SpawnLoc);
+		FTransform SpawnTransform;
 
-		// spawn the NPC
-		ATwinStickNPC* NPC = GetWorld()->SpawnActor<ATwinStickNPC>(NPCClass, SpawnTransform);
+		// find a random point around the spawner
+		FVector SpawnLoc;
+		if (UNavigationSystemV1::K2_GetRandomReachablePointInRadius(GetWorld(), GetActorLocation(), SpawnLoc, SpawnRadius, NavData))
+		{
+			SpawnTransform.SetLocation(SpawnLoc);
+
+			// spawn the NPC
+			ATwinStickNPC* NPC = GetWorld()->SpawnActor<ATwinStickNPC>(NPCClass, SpawnTransform);
+		}
+
+		// increase the spawn counter
+		++SpawnCount;
+
+		// do we still have enemies left to spawn?
+		if (SpawnCount < SpawnGroupSize)
+		{
+			GetWorld()->GetTimerManager().SetTimer(SpawnNPCTimer, this, &ATwinStickSpawner::SpawnNPC, FMath::RandRange(MinSpawnDelay, MaxSpawnDelay), false);
+		}
 	}
-
-	// increase the spawn counter
-	++SpawnCount;
-
-	// do we still have enemies left to spawn?
-	if (SpawnCount < SpawnGroupSize)
-	{
-		GetWorld()->GetTimerManager().SetTimer(SpawnNPCTimer, this, &ATwinStickSpawner::SpawnNPC, FMath::RandRange(MinSpawnDelay, MaxSpawnDelay), false);
-	}
+	
 
 }
