@@ -126,8 +126,10 @@ void ATwinStickGameMode::FindClosestSpawners()
 {
 	for (auto& spawner : Spawners)
 	{
-		float distance = FVector::Dist(Player->GetActorLocation(), spawner->GetActorLocation());
-		if (distance > range)
+		if (Player)
+		{
+			float distance = FVector::Dist(Player->GetActorLocation(), spawner->GetActorLocation());
+			if (distance > range)
 		{
 			spawner->bCanSpawn = false;
 		}
@@ -135,6 +137,8 @@ void ATwinStickGameMode::FindClosestSpawners()
 		{
 			spawner->bCanSpawn = true;
 		}
+		}
+	
 
 	}
 }
