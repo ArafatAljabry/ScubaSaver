@@ -4,10 +4,6 @@
 #include "Enemies/BagCharacter.h"
 
 #include "EnemyAIController.h"
-#include "TwinStickCharacter.h"
-#include "TwinStickGameMode.h"
-#include "TwinStickNPCDestruction.h"
-#include "TwinStickPickup.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -16,7 +12,10 @@ ABagCharacter::ABagCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
+	BoxCollider->SetupAttachment(GetRootComponent());
+	BoxCollider->IgnoreActorWhenMoving(this, true);
+	
 
 }
 
@@ -24,6 +23,8 @@ ABagCharacter::ABagCharacter()
 void ABagCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &ABagCharacter::OnOverlapBegin);
+	GetCharacterMovement()->MaxWalkSpeed = speed;
 	
 }
 
@@ -41,61 +42,17 @@ void ABagCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
-void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
+void ABagCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// only handle damage if we haven't been hit yet
-	if (bHit)
+	if (OtherActor->ActorHasTag("Player"))
 	{
-		return;
+		//Damage
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Damage player"));
+
+
 	}
 
-	// raise the hit flag
-	bHit = true;
 
-	// deactivate character movement
-	GetCharacterMovement()->Deactivate();
-
-	// award points
-	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
-	{
-		GM->ScoreUpdate(Score);
-	}
-
-	// randomly spawn a pickup
-	if (FMath::RandRange(0, 100) < 30)
-	{//change to fish here
-		ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
-	}
-
-	// spawn the NPC destruction proxy
-	ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
-
-	// hide this actor
-	SetActorHiddenInGame(true);
-
-	// disable collision
-	SetActorEnableCollision(false);
-
-	// defer destruction
-	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 2, false);
 
 }
-
-void ABagCharacter::Killed()
-{
-	Destroy();
-}
-
-void ABagCharacter::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp,
-	bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
-{
-	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-
-	if (ATwinStickCharacter* PlayerCharacter = Cast<ATwinStickCharacter>(Other))
-	{
-		// apply damage to the character
-		PlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
-	}
-
-}
-
