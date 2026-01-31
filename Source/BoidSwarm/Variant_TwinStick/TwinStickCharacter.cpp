@@ -15,7 +15,7 @@
 #include "TimerManager.h"
 #include "Boid.h"
 #include "Kismet/KismetMathLibrary.h"
-
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/PrimitiveComponent.h" // For the HitResult's component
 #include "Engine/EngineTypes.h" // Contains FHitResult definition
@@ -52,6 +52,13 @@ ATwinStickCharacter::ATwinStickCharacter()
 	GetCharacterMovement()->bSnapToPlaneAtStart = true;
 
 	bIsLeftMouseDown = false;
+
+	/*Pause menu widget class*/
+	static ConstructorHelpers::FClassFinder<UUserWidget> PauseMenuBPClass(TEXT("/Game/UI/WBP_PauseMenu"));
+	if (PauseMenuBPClass.Class)
+	{
+		PauseMenuWidgetClass = PauseMenuBPClass.Class;
+	}
 }
 
 /*
@@ -225,6 +232,47 @@ void ATwinStickCharacter::NotifyControllerChanged()
 	PlayerController = Cast<APlayerController>(GetController());
 }
 
+void ATwinStickCharacter::Pause()
+{
+	if (isPaused)
+	{
+		HidePauseMenu();
+		isPaused = false;
+	}
+	else
+	{
+		ShowPauseMenu();
+		isPaused = true;
+	}
+}
+
+void ATwinStickCharacter::ShowPauseMenu()
+{
+	isPaused = true;
+
+	if (!PauseMenuWidget && PauseMenuWidgetClass)
+	{
+		PauseMenuWidget = CreateWidget<UUserWidget> (this, PauseMenuWidgetClass);
+	}
+	if (PauseMenuWidget && !PauseMenuWidget->IsInViewport())
+	{
+		PauseMenuWidget->AddToViewport();
+	}
+
+	//Set the input mode to UI only
+	FInputModeGameAndUI InputMode;
+	InputMode.SetWidgetToFocus(PauseMenuWidget->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->SetShowMouseCursor(true);
+
+}
+
+void ATwinStickCharacter::HidePauseMenu()
+{
+}
+
 void ATwinStickCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -290,6 +338,8 @@ void ATwinStickCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(StickAimAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::StickAim);
 		EnhancedInputComponent->BindAction(MouseAimAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::MouseAim);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Dash);
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Pause);
+
 		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Shoot);
 		EnhancedInputComponent->BindAction(AoEAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::AoEAttack);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ATwinStickCharacter::OnLeftMousePressed);

@@ -59,6 +59,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* AoEAction;
 
+	/* Pause input action*/
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* PauseAction;
+
 	/** Trace channel to use for mouse aim */
 	UPROPERTY(EditAnywhere, Category="Input")
 	TEnumAsByte<ETraceTypeQuery> MouseAimTraceChannel;
@@ -140,7 +144,17 @@ protected:
 	/** Possessed by controller initialization */
 	virtual void NotifyControllerChanged() override;
 
-public:	
+public:
+	/*Pause Menu*/
+	UPROPERTY()
+	UUserWidget* PauseMenuWidget;
+	UPROPERTY(EditDefaultsOnly,Category="Ui")
+	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
+
+	bool isPaused{false};
+	void Pause();
+	void ShowPauseMenu();
+	void HidePauseMenu();
 	
 	/** Updates the character's rotation to face the aim direction */
 	virtual void Tick(float DeltaTime) override;
@@ -165,6 +179,8 @@ protected:
 
 	/** Performs an AoE Attack */
 	void AoEAttack(const FInputActionValue& Value);
+	/*Pause screen*/
+	void PauseGame(const FInputActionValue& Value);
 
 public:
 
