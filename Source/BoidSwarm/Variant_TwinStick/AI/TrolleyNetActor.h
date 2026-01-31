@@ -25,9 +25,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = "Enemy")
-	float speed = 10.0f;
+	float speed = 20.0f;
 	UPROPERTY(EditAnywhere, Category = "Enemy")
-	float damage = 3.0f;
+	float damage = 1000.0f;
 
 
 protected:
