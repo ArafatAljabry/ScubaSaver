@@ -87,12 +87,23 @@ public:
 
 	//Around player/target : 
 
+	//TODO : make variables that shouldn't be stored in every Boid individualy static
+
 	ATwinStickCharacter* spawner;
 	FVector Center;
 	FVector Radius;
 
 	static TArray<TWeakObjectPtr<ABoid>> AllBoids;
 
+
+	void UpdateTextureColor(const FLinearColor& NewColor);
+
+protected:
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicMaterial;
 
 private:
 	FVector GetSeparation(const TArray<ABoid*>& Neighbours) const;
