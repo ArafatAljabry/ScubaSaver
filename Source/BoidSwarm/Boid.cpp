@@ -71,13 +71,13 @@ void ABoid::updateHealth(float num)
 	float newHealth = health + num;
 	health = FMath::Clamp(newHealth, 0.f, maxHealth);
 	if (health == 0) { Destroy(); } // Fish die when HP equals 0, duh.
-	else {
+	/*else {		// Can't figure out how to make hues work. Please help.
 		float RedTint = (1-((maxHealth*health)/100)/100);
 		RedTint = FMath::Clamp(RedTint, 0.0f, 1.0f);
 		FLinearColor NewColor = FLinearColor(RedTint, 0, 0, 1);
 		UpdateTextureColor(NewColor);
-		/*MyColor = NewColor;*/
-	}
+		MyColor = NewColor;
+	}*/
 }
 
 // Called when the game starts or when spawned
