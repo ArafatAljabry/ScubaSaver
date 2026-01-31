@@ -79,6 +79,7 @@ void ABoid::updateHealth(float num)
 	//	UpdateTextureColor(NewColor);
 	//	/*MyColor = NewColor;*/
 	//}
+
 }
 
 // Called when the game starts or when spawned
