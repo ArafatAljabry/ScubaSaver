@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TwinStickCharacter.h"
+#include "TwinStickSpawner.h"
 #include "GameFramework/GameModeBase.h"
 #include "TwinStickGameMode.generated.h"
 
@@ -16,6 +18,8 @@ UCLASS(abstract)
 class ATwinStickGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	ATwinStickGameMode();
 	
 protected:
 
@@ -59,10 +63,23 @@ protected:
 	/** Current number of NPCs in the level */
 	int32 NPCCount = 0;
 
+
+
+	UPROPERTY()
+	ATwinStickCharacter* Player;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	TArray<ATwinStickSpawner*> Spawners;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	float range = 0;
+
 public:
 
 	/** Gameplay initialization */
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	/** Cleanup */
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
@@ -87,6 +104,9 @@ protected:
 	void ResetCombo();
 
 public:
+
+	UFUNCTION()
+	void FindClosestSpawners();
 
 	/** Returns true if the number of NPCs is under the cap */
 	bool CanSpawnNPCs();

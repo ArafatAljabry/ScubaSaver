@@ -7,11 +7,39 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 
+ATwinStickGameMode::ATwinStickGameMode()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void ATwinStickGameMode::BeginPlay()
 {
+	
+
 	// create the UI widget and add it to the viewport
 	UIWidget = CreateWidget<UTwinStickUI>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
+	Player = Cast<ATwinStickCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(this, ATwinStickSpawner::StaticClass(), actors);
+
+	for (auto& actor : actors)
+	{
+		if (ATwinStickSpawner* Spawner = Cast<ATwinStickSpawner>(actor))
+		{
+			Spawners.Add(Spawner);
+		}
+
+	}
+}
+
+void ATwinStickGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	
+	FindClosestSpawners();
 }
 
 void ATwinStickGameMode::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -91,6 +119,23 @@ void ATwinStickGameMode::ResetCombo()
 
 		// reset the cooldown timer
 		ResetComboCooldown();
+	}
+}
+
+void ATwinStickGameMode::FindClosestSpawners()
+{
+	for (auto& spawner : Spawners)
+	{
+		float distance = FVector::Dist(Player->GetActorLocation(), spawner->GetActorLocation());
+		if (distance > range)
+		{
+			spawner->bCanSpawn = false;
+		}
+		else
+		{
+			spawner->bCanSpawn = true;
+		}
+
 	}
 }
 
