@@ -7,6 +7,8 @@
 #include "TwinStickCharacter.h"
 #include "Containers/Set.h"
 #include "UObject/WeakObjectPtr.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Boid.generated.h"
 
 UCLASS()
@@ -17,6 +19,13 @@ class BOIDSWARM_API ABoid : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ABoid();
+
+	void UpdateTextureColor(const FLinearColor& NewColor);
+
+	FLinearColor UpdateTextureColorF(const FLinearColor& NewColor);
+
+private :
+	//FLinearColor MyColor = FLinearColor(0,0,0,1);
 
 protected:
 	// Called when the game starts or when spawned
@@ -94,9 +103,6 @@ public:
 	FVector Radius;
 
 	static TArray<TWeakObjectPtr<ABoid>> AllBoids;
-
-
-	void UpdateTextureColor(const FLinearColor& NewColor);
 
 protected:
 	UPROPERTY(VisibleAnywhere)

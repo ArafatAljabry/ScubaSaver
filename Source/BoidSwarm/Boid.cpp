@@ -23,9 +23,13 @@ ABoid::ABoid()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;	    
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("OverlapAll"));
-
+	/*
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	RootComponent = MeshComponent;
+	MeshComponent->SetupAttachment(GetCapsuleComponent());
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
+	/*
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	RootComponent = MeshComponent;*/
 }
 
 
@@ -45,11 +49,35 @@ void ABoid::UpdateTextureColor(const FLinearColor& NewColor)
 	}
 }
 
+
+FLinearColor ABoid::UpdateTextureColorF(const FLinearColor& NewColor)
+{
+	if (!DynamicMaterial)
+	{
+		UMaterialInterface* BaseMaterial = MeshComponent->GetMaterial(0);
+		DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+		MeshComponent->SetMaterial(0, DynamicMaterial);
+	}
+
+	if (DynamicMaterial)
+	{
+		DynamicMaterial->SetVectorParameterValue(FName("Color"), NewColor);
+	}
+	return NewColor;
+}
+
 void ABoid::updateHealth(float num)
 {
 	float newHealth = health + num;
 	health = FMath::Clamp(newHealth, 0.f, maxHealth);
 	if (health == 0) { Destroy(); } // Fish die when HP equals 0, duh.
+	/*else {
+		float RedTint = (1-((maxHealth*health)/100)/100);
+		RedTint = FMath::Clamp(RedTint, 0.0f, 1.0f);
+		FLinearColor NewColor = FLinearColor(RedTint, MyColor.G, MyColor.B, 1);
+		UpdateTextureColor(NewColor);
+		MyColor = NewColor;
+	}*/
 }
 
 // Called when the game starts or when spawned
