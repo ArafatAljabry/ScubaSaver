@@ -13,6 +13,7 @@ ABagCharacter::ABagCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
+	BoxCollider->SetupAttachment(GetRootComponent());
 	BoxCollider->IgnoreActorWhenMoving(this, true);
 	
 
