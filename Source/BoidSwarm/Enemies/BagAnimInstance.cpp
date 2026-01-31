@@ -13,4 +13,9 @@ void UBagAnimInstance::NativeInitializeAnimation()
 void UBagAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	if (!Bag)
+	{
+		Bag = Cast<ABagCharacter>(TryGetPawnOwner());
+	}
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TwinStickNPC.h"
+#include "Enemies/BagCharacter.h"
 #include "TwinStickSpawner.generated.h"
 
 class ARecastNavMesh;
@@ -22,7 +23,10 @@ protected:
 	/** Type of NPC to spawn */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner")
 	TSubclassOf<ATwinStickNPC> NPCClass;
-	
+
+	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
+	TSubclassOf<ABagCharacter> BagNPCClass;
+
 	/** Time delay between enemy group spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20, Units = "s"))
 	float SpawnGroupDelay = 5.0f;

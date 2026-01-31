@@ -20,7 +20,7 @@ void AEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BagBbComp->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
+	//BagBbComp->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
 }
 
 void AEnemyAIController::OnPossess(APawn* InPawn)
@@ -31,6 +31,7 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 	if (!BagBT)
 	{return;}
 	UseBlackboard(BagBT->GetBlackboardAsset(), BagBbComp);
+	BagBbComp->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
 	RunBehaviorTree(BagBT);
 	
 	

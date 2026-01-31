@@ -25,7 +25,7 @@ ABagCharacter::ABagCharacter()
 void ABagCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &ABagCharacter::OnOverlapBegin);
+	BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &ABagCharacter::OnOverlapBegin);
 	GetCharacterMovement()->MaxWalkSpeed = speed;
 	
 }
@@ -47,14 +47,12 @@ void ABagCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void ABagCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor->ActorHasTag("Player"))
-	{
-		//Damage
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Damage player"));
 
-
-	}
-
+		if (ATwinStickCharacter* PlayerCharacter = Cast<ATwinStickCharacter>(OtherActor))
+		{
+			// apply damage to the character
+			PlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
+		}
 
 
 }
