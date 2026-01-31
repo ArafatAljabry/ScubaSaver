@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TwinStickNPCDestruction.h"
+#include "TwinStickPickup.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "Perception/PawnSensingComponent.h"
@@ -37,9 +38,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "variables")
 	float damage;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* BoxCollider;
 
 	UPROPERTY(EditAnywhere, Category = "Destruction")
 	TSubclassOf<ATwinStickNPCDestruction> DestructionProxyClass;
@@ -49,14 +47,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Score", meta = (ClampMin = 0, ClampMax = 100))
 	int32 Score = 1;
 
+	UPROPERTY(EditAnywhere, Category = "Pickup")
+	TSubclassOf<ATwinStickPickup> PickupClass;
+
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
 	bool bHit = false;
 
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);
-
+	
 	UFUNCTION()
 	void Killed();
 

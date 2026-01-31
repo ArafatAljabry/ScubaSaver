@@ -77,8 +77,8 @@ void ATwinStickSpawner::SpawnNPC()
 			SpawnTransform.SetLocation(SpawnLoc);
 
 			// spawn the NPC
-			ATwinStickNPC* NPC = GetWorld()->SpawnActor<ATwinStickNPC>(NPCClass, SpawnTransform);
-			//ABagCharacter* Bag = GetWorld()->SpawnActor<ABagCharacter>(BagNPCClass, SpawnTransform);
+			//ATwinStickNPC* NPC = GetWorld()->SpawnActor<ATwinStickNPC>(NPCClass, SpawnTransform);
+			ABagCharacter* Bag = GetWorld()->SpawnActor<ABagCharacter>(BagNPCClass, SpawnTransform);
 		}
 
 		// increase the spawn counter
