@@ -36,8 +36,8 @@ protected:
 	float MaxSpawnDelay = 0.66f;
 
 	/** Radius around the spawner where it can spawn NPCs */
-	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 10000, Units = "cm"))
-	float SpawnRadius = 5000.0f;
+	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20000, Units = "cm"))
+	float SpawnRadius = 1000.0f;
 
 	/** Number of NPCs to spawn per group */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 10))
