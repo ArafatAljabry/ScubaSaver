@@ -3,6 +3,7 @@
 
 #include "Boid.h"
 #include "TwinStickNPC.h"
+#include "TrolleyNetActor.h"
 #include <Kismet/KismetMathLibrary.h>
 
 #include "Components/CapsuleComponent.h"
@@ -23,6 +24,32 @@ ABoid::ABoid()
 	PrimaryActorTick.bCanEverTick = true;	    
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("OverlapAll"));
 
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	RootComponent = MeshComponent;
+}
+
+
+void ABoid::UpdateTextureColor(const FLinearColor& NewColor)
+{
+	if (!DynamicMaterial)
+	{
+		UMaterialInterface* BaseMaterial = MeshComponent->GetMaterial(0);
+		DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+		MeshComponent->SetMaterial(0, DynamicMaterial);
+	}
+
+	if (DynamicMaterial)
+	{
+		// "Color" must match your Vector Parameter in the material
+		DynamicMaterial->SetVectorParameterValue(FName("Color"), NewColor);
+	}
+}
+
+void ABoid::updateHealth(float num)
+{
+	float newHealth = health + num;
+	health = FMath::Clamp(newHealth, 0.f, maxHealth);
+	if (health == 0) { Destroy(); } // Fish die when HP equals 0, duh.
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +73,7 @@ void ABoid::BeginPlay()
 
 	OrbitPhase = FMath::FRandRange(0.f, 1000.f);
 
+	health = maxHealth;
 }
 
 // DANGER ZONE
@@ -75,13 +103,6 @@ void ABoid::GetNeighbours(TArray<ABoid*>& OutNeighbours) const
 			OutNeighbours.Add(B);
 		}
 	}
-}
-
-void ABoid::updateHealth(float num)
-{
-	float newHealth = health + num;
-	health = FMath::Clamp(newHealth, 0.f, maxHealth);
-	
 }
 
 FVector ABoid::GetSeparation(const TArray<ABoid*>& Neighbours) const
@@ -337,9 +358,8 @@ void ABoid::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp,
 			
 			if (ATwinStickNPC* NPC = Cast<ATwinStickNPC>(OverlapActor))
 			{
+				updateHealth(-25); //Deal damage to boids :<
 				NPC->ProjectileImpact(GetActorForwardVector()); //Make enemies die :>
-				Destroy(); //Make Boids die :<
-
 			}
 
 			if (ABoid* OtherBoid = Cast<ABoid>(OverlapActor))
@@ -349,6 +369,12 @@ void ABoid::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp,
 			/*
 			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan,
 				FString::Printf(TEXT("Overlap with: %s"), *OverlapActor->GetName()));*/
+
+			if (ATrolleyNetActor* Trolley = Cast<ATrolleyNetActor>(OverlapActor)) {
+				updateHealth(Trolley->damage); //Deal damage to boids :<
+			}
+
+
 		}
 
 		// TODO: Add your custom trigger logic here (e.g., elimination, gameplay events)
