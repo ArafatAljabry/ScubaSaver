@@ -114,5 +114,5 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	SetActorEnableCollision(false);
 
 	// defer destruction
-	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 2, false);
+	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 0.1, false);
 }
