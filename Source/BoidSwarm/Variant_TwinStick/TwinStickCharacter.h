@@ -286,4 +286,7 @@ public:
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boids")
 		FVector SwarmCenter = FVector::ZeroVector;
 
+
+		void DeleteBoidFromArray(ABoid* Boid);
+
 };

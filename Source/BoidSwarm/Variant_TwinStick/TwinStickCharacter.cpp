@@ -100,6 +100,12 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	}
 
 	const int32 AvailableSlots = maxFishNumber - Boids.Num();
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		2.0f,
+		FColor::Yellow,
+		FString::Printf(TEXT("Available: %d"), AvailableSlots)
+	);
 	if (AvailableSlots <= 0)
 	{
 		return; // already at cap
@@ -109,7 +115,7 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	if (!World) return;
 
 	spawnOrigin = GetActorLocation();
-	Count = FMath::Min(Count, AvailableSlots);
+	//Count = FMath::Min(Count, AvailableSlots);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -117,9 +123,9 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	SpawnParams.SpawnCollisionHandlingOverride =
 		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	Boids.Reserve(Boids.Num() + Count);
+	Boids.Reserve(Boids.Num() + AvailableSlots);
 
-	for (int32 i = 0; i < Count; ++i)
+	for (int32 i = 0; i < AvailableSlots; ++i)
 	{
 		const FVector SpawnLocation =
 			spawnOrigin + FVector(
@@ -149,6 +155,18 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	UE_LOG(LogTemp, Warning, TEXT("Spawned %d boids. Total: %d"), Count, Boids.Num());
 }
 
+void ATwinStickCharacter::DeleteBoidFromArray(ABoid* Boid)
+{
+	if (!Boid)
+	{
+		return;
+	}
+
+	Boids.RemoveSingleSwap(Boid);
+
+	
+
+}
 
 
 void ATwinStickCharacter::BeginPlay()
@@ -338,6 +356,13 @@ void ATwinStickCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		2.0f,
+		FColor::Yellow,
+		FString::Printf(TEXT("Doids size: %d"), Boids.Num())
+	);
 	// get the current rotation
 	const FRotator OldRotation = GetActorRotation();
 
@@ -615,6 +640,8 @@ void ATwinStickCharacter::HandleDamage(float Damage, const FVector& DamageDirect
 	//LaunchCharacter(LaunchVector * KnockbackStrength, true, true);
 
 	// pass control to BP
+
+
 	BP_Damaged();
 }
 
