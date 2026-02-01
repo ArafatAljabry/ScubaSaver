@@ -41,7 +41,7 @@ protected:
 
 	/** Time delay between enemy group spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20, Units = "s"))
-	float SpawnGroupDelay = 5.0f;
+	float SpawnGroupDelay = 7.0f;
 
 	/** Min time delay between individual NPC spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 2, Units = "s"))
@@ -57,7 +57,7 @@ protected:
 
 	/** Number of NPCs to spawn per group */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 10))
-	int32 SpawnGroupSize = 3;
+	int32 SpawnGroupSize = 1;
 	
 	/** Number of NPCs spawned in the current group */
 	int32 SpawnCount = 0;

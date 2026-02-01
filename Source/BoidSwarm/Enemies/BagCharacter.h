@@ -50,6 +50,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Pickup")
 	TSubclassOf<ATwinStickPickup> PickupClass;
 
+	UPROPERTY(EditAnywhere, Category = "Pickup")
+	float FishSpawnPercentage = 0;
+
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")

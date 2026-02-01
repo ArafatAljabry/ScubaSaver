@@ -8,6 +8,8 @@
 #include <Kismet/KismetMathLibrary.h>
 #include <TwinStickPlayerController.h>
 
+#include "Components/AudioComponent.h"
+
 
 // Sets default values
 ATrolleyNetActor::ATrolleyNetActor()
@@ -51,6 +53,7 @@ void ATrolleyNetActor::BeginPlay()
 			false                        // Auto destroy when done
 		);
 	}
+	trolleySoundComponent->Play();
 
 	//Make Trawler look at the player 
 	ATwinStickPlayerController* playerRef = (ATwinStickPlayerController*)GetWorld()->GetFirstPlayerController();
