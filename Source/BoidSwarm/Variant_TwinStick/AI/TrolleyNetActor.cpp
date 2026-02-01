@@ -3,6 +3,11 @@
 
 #include "Variant_TwinStick/AI/TrolleyNetActor.h"
 
+#include "Kismet/GameplayStatics.h"
+#include <TwinStickCharacter.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <TwinStickPlayerController.h>
+
 
 // Sets default values
 ATrolleyNetActor::ATrolleyNetActor()
@@ -19,12 +24,40 @@ ATrolleyNetActor::ATrolleyNetActor()
 
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+
 }
 
 // Called when the game starts or when spawned
 void ATrolleyNetActor::BeginPlay()
 {
 	Super::BeginPlay();
+	//Create the component
+	if (trolleySound)
+	{
+
+		trolleySoundComponent = UGameplayStatics::SpawnSoundAttached(
+			trolleySound,              // Sound to play
+			GetRootComponent(),        // Attach to character mesh
+			NAME_None,                  // No specific socket
+			FVector::ZeroVector,        // No offset
+			FRotator::ZeroRotator,      // No rotation
+			EAttachLocation::SnapToTarget, // Snap to mesh location
+			true,                       // Stop if destroyed
+			1.0f,                       // Volume
+			1.0f,                       // Pitch
+			0.0f,                       // Start at beginning
+			nullptr,                    // Use sound's attenuation
+			nullptr,                    // Use sound's concurrency
+			false                        // Auto destroy when done
+		);
+	}
+
+	//Make Trawler look at the player 
+	ATwinStickPlayerController* playerRef = (ATwinStickPlayerController*)GetWorld()->GetFirstPlayerController();
+	if (!playerRef)
+		return;
+	FRotator SpawnDir = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), playerRef->GetPawn()->GetActorLocation());
+	SetActorRotation(SpawnDir);
 }
 
 // Called every frame

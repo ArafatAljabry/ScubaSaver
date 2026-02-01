@@ -16,9 +16,11 @@
 #include "Boid.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/PrimitiveComponent.h" // For the HitResult's component
 #include "Engine/EngineTypes.h" // Contains FHitResult definition
+#include "Kismet/GameplayStatics.h"
 
 ATwinStickCharacter::ATwinStickCharacter()
 {
@@ -214,6 +216,25 @@ void ATwinStickCharacter::BeginPlay()
 	//
 	//	//Suggested by GPT ^
 	//
+
+	//Background audio
+	if (BackgroundMusic)
+	{
+		//Create the component
+		MusicComponent = UGameplayStatics::SpawnSound2D(
+														this,
+														BackgroundMusic,
+														1.0f,      // Volume
+														1.0f,      // Pitch
+														0.0f,      // Start time
+														nullptr,   // Concurrency
+														true,      // Persist
+														false      // Don't auto destroy
+														);
+		if (MusicComponent)
+			MusicComponent->Play();
+	}
+
 }
 
 void ATwinStickCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -235,43 +256,75 @@ void ATwinStickCharacter::NotifyControllerChanged()
 void ATwinStickCharacter::Pause()
 {
 	if (isPaused)
-	{
-		HidePauseMenu();
-		isPaused = false;
-	}
-	else
-	{
-		ShowPauseMenu();
-		isPaused = true;
-	}
+		return;
+	ShowPauseMenu();
+	
 }
 
 void ATwinStickCharacter::ShowPauseMenu()
 {
-	isPaused = true;
-
+	// Create widget if it doesn't exist
 	if (!PauseMenuWidget && PauseMenuWidgetClass)
 	{
-		PauseMenuWidget = CreateWidget<UUserWidget> (this, PauseMenuWidgetClass);
+		
+		if (PlayerController)
+		{
+			PauseMenuWidget = CreateWidget<UUserWidget>(PlayerController, PauseMenuWidgetClass);
+
+		}
 	}
+
+	// Only proceed if widget exists and is not already in viewport
 	if (PauseMenuWidget && !PauseMenuWidget->IsInViewport())
 	{
+
+		// Add to viewport ONCE
 		PauseMenuWidget->AddToViewport();
+
+		// Set input mode to UI only (or GameAndUI if you want game input too)
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(PauseMenuWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		
+		if (PlayerController)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("xxxthree"));
+
+			PlayerController->SetInputMode(InputMode);
+			PlayerController->SetShowMouseCursor(true);
+
+		}
+
+		// Pause the game
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+		//Audio 
+		if (PauseMenuMusic)
+		{
+			//Create the component
+			PauseMenuMusicComponent = UGameplayStatics::SpawnSound2D(
+				this,
+				PauseMenuMusic,
+				1.0f,      // Volume
+				1.0f,      // Pitch
+				0.0f,      // Start time
+				nullptr,   // Concurrency
+				true,      // Persist
+				false      // Don't auto destroy
+			);
+			if (PauseMenuMusicComponent)
+				MusicComponent->SetPaused(true);
+				PauseMenuMusicComponent->Play();
+		}
+
+
+
+
+		isPaused = true;
 	}
-
-	//Set the input mode to UI only
-	FInputModeGameAndUI InputMode;
-	InputMode.SetWidgetToFocus(PauseMenuWidget->TakeWidget());
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	
-	PlayerController->SetInputMode(InputMode);
-	PlayerController->SetShowMouseCursor(true);
-
 }
 
-void ATwinStickCharacter::HidePauseMenu()
-{
-}
+
 
 void ATwinStickCharacter::Tick(float DeltaTime)
 {

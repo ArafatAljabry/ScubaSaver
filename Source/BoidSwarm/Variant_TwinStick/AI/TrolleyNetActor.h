@@ -33,4 +33,12 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Collision")
 	UBoxComponent* CollisionComponent;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* trolleySound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	UAudioComponent* trolleySoundComponent;
+
 };

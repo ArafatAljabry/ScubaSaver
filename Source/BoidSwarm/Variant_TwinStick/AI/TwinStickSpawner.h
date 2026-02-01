@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TwinStickNPC.h"
+#include "Variant_TwinStick/AI/TrolleyNetActor.h"
 #include "Enemies/BagCharacter.h"
 #include "TwinStickSpawner.generated.h"
 
@@ -27,17 +28,28 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
 	TSubclassOf<ABagCharacter> BagNPCClass;
 
+	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
+	TSubclassOf<ATrolleyNetActor> TrawlerNPCClass;
+
+
+	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
+	bool isBag = true;
+
+	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
+	bool isTrawler = false;
+
+
 	/** Time delay between enemy group spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20, Units = "s"))
 	float SpawnGroupDelay = 5.0f;
 
 	/** Min time delay between individual NPC spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 2, Units = "s"))
-	float MinSpawnDelay = 0.33f;
+	float MinSpawnDelay = 1.0f;
 
 	/** Max time delay between individual NPC spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 2, Units = "s"))
-	float MaxSpawnDelay = 0.66f;
+	float MaxSpawnDelay = 2.0f;
 
 	/** Radius around the spawner where it can spawn NPCs */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20000, Units = "cm"))
