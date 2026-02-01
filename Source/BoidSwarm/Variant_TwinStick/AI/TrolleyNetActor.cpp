@@ -4,6 +4,9 @@
 #include "Variant_TwinStick/AI/TrolleyNetActor.h"
 
 #include "Kismet/GameplayStatics.h"
+#include <TwinStickCharacter.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <TwinStickPlayerController.h>
 
 
 // Sets default values
@@ -48,6 +51,11 @@ void ATrolleyNetActor::BeginPlay()
 			false                        // Auto destroy when done
 		);
 	}
+
+	//Make Trawler look at the player 
+	/*ATwinStickPlayerController* playerRef = GetWorld()->GetFirstPlayerController();
+	FRotator SpawnDir = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), playerRef->GetActorLocation());
+	SetActorRotation(SpawnDir);*/
 }
 
 // Called every frame
