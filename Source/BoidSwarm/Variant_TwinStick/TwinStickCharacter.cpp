@@ -25,6 +25,7 @@
 ATwinStickCharacter::ATwinStickCharacter()
 {
  	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickInterval = 0.033;
 
 	// create the spring arm
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
@@ -98,10 +99,17 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 		return;
 	}
 
+	const int32 AvailableSlots = maxFishNumber - Boids.Num();
+	if (AvailableSlots <= 0)
+	{
+		return; // already at cap
+	}
+
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	spawnOrigin = GetActorLocation();
+	Count = FMath::Min(Count, AvailableSlots);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -394,7 +402,7 @@ void ATwinStickCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Pause);
 
 		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Shoot);
-		EnhancedInputComponent->BindAction(AoEAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::AoEAttack);
+		//EnhancedInputComponent->BindAction(AoEAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::AoEAttack);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ATwinStickCharacter::OnLeftMousePressed);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &ATwinStickCharacter::OnLeftMouseReleased);
 
@@ -571,6 +579,7 @@ void ATwinStickCharacter::DoAoEAttack()
 	// do we have enough items to do an AoE attack?
 	if (Items > 0)
 	{
+		
 		// get the game time
 		const float GameTime = GetWorld()->GetTimeSeconds();
 
@@ -599,11 +608,11 @@ void ATwinStickCharacter::DoAoEAttack()
 void ATwinStickCharacter::HandleDamage(float Damage, const FVector& DamageDirection)
 {
 	// calculate the knockback vector
-	FVector LaunchVector = DamageDirection;
-	LaunchVector.Z = 0.0f;
+	//FVector LaunchVector = DamageDirection;
+	//LaunchVector.Z = 0.0f;
 
-	// apply knockback to the character
-	LaunchCharacter(LaunchVector * KnockbackStrength, true, true);
+	//// apply knockback to the character
+	//LaunchCharacter(LaunchVector * KnockbackStrength, true, true);
 
 	// pass control to BP
 	BP_Damaged();
@@ -616,6 +625,8 @@ void ATwinStickCharacter::AddPickup()
 
 	// update the items counter
 	UpdateItems();
+	DoAoEAttack();
+
 }
 
 void ATwinStickCharacter::UpdateItems()

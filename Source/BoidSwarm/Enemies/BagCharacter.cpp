@@ -71,6 +71,12 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 
 	// raise the hit flag
 	bHit = true;
+	GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("outch!")  // Message
+	);
 
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
@@ -82,9 +88,16 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	}
 
 	// randomly spawn a pickup
-	if (FMath::RandRange(0, 100) <20)
+	if (FMath::RandRange(0, 100) <= FishSpawnPercentage)
 	{
 		//
+		GEngine->AddOnScreenDebugMessage(
+			-1,                      // Key (-1 = new line)
+			5.f,                     // Display time in seconds
+			FColor::Yellow,          // Text color
+			TEXT("im busting")  // Message
+		);
+
 		ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
 	}
 

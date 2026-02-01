@@ -201,6 +201,7 @@ void ABoid::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (!spawner) return;
+
 	
 	if (Radius == FVector::ZeroVector || Center == FVector::ZeroVector) {
 		if (spawner == nullptr) return;
@@ -210,6 +211,7 @@ void ABoid::Tick(float DeltaTime)
 
 
 	const FVector MyPos = GetActorLocation();
+	const FVector MyFowardVector = GetActorForwardVector();
 	const FVector SwarmCenter = Center + PersonalOffset;
 
 
@@ -237,7 +239,7 @@ void ABoid::Tick(float DeltaTime)
 			SetActorRotation(NewQ);
 		}
 
-		AddActorWorldOffset(GetActorForwardVector() * speed * DeltaTime, true);
+		AddActorWorldOffset(MyFowardVector * speed * DeltaTime, true);
 		return;
 	}
 	else
@@ -305,7 +307,7 @@ void ABoid::Tick(float DeltaTime)
 		AvgHeading /= Neighbours.Num();
 		AvgPos /= Neighbours.Num();
 
-		Ali = (AvgHeading - GetActorForwardVector());
+		Ali = (AvgHeading - MyFowardVector);
 		Coh = (AvgPos - MyPos); 
 	}
 
@@ -337,7 +339,7 @@ void ABoid::Tick(float DeltaTime)
 
 
 	FVector DesiredDir =
-		GetActorForwardVector() +
+		MyFowardVector +
 		FlockForce +
 		Orbit * OrbitWeight +
 		CenterPull * CenterPullWeight;
@@ -360,7 +362,7 @@ void ABoid::Tick(float DeltaTime)
 
 	// DANGER ZONE end!!!
 
-	AddActorWorldOffset(GetActorForwardVector() * speed * DeltaTime);
+	AddActorWorldOffset(MyFowardVector * speed * DeltaTime);
 
 }
 
