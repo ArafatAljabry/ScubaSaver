@@ -124,6 +124,9 @@ protected:
 	/** Timer to handle stick autofire */
 	FTimerHandle AutoFireTimer;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float maxFishNumber;
+
 public:
 	
 	/** Constructor */
