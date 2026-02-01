@@ -7,7 +7,9 @@
 #include "TwinStickGameMode.h"
 #include "TwinStickNPCDestruction.h"
 #include "TwinStickPickup.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABagCharacter::ABagCharacter()
@@ -44,7 +46,18 @@ void ABagCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ABagCharacter::Killed()
 {
+	if (SoundBase)
+	{
+		// Play sound
+		UGameplayStatics::PlaySoundAtLocation(this, SoundBase, GetActorLocation());
 
+		// Delay destruction
+		FTimerHandle DeathTimer;
+		GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &ABagCharacter::DestroyActor, 0.5f, false);
+	}
+}
+void ABagCharacter::DestroyActor()
+{
 	Destroy();
 }
 
