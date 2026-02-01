@@ -71,7 +71,14 @@ void ABoid::updateHealth(float num)
 {
 	float newHealth = health + num;
 	health = FMath::Clamp(newHealth, 0.f, maxHealth);
-	if (health == 0) { Destroy(); } // Fish die when HP equals 0, duh.
+	if (health == 0)
+	{
+		Destroy();
+		spawner->DeleteBoidFromArray(this);
+	}
+
+	
+	// Fish die when HP equals 0, duh.
 	//else {
 	//	float RedTint = (1-((maxHealth*health)/100)/100);
 	//	RedTint = FMath::Clamp(RedTint, 0.0f, 1.0f);
