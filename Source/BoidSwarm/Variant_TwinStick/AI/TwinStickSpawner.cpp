@@ -78,12 +78,12 @@ void ATwinStickSpawner::SpawnNPC()
 
 			// spawn the NPC
 			//ATwinStickNPC* NPC = GetWorld()->SpawnActor<ATwinStickNPC>(NPCClass, SpawnTransform);
-			if(isBag){ABagCharacter* Bag = GetWorld()->SpawnActor<ABagCharacter>(BagNPCClass, SpawnTransform);}
+			if(isBag){ABagCharacter* Bag = GetWorld()->SpawnActor<ABagCharacter>(BagNPCClass, SpawnTransform); }
 			if(isTrawler) { ATrolleyNetActor* Trawler = GetWorld()->SpawnActor<ATrolleyNetActor>(TrawlerNPCClass, SpawnTransform); }
 		}
-
-		// increase the spawn counter
 		++SpawnCount;
+		// increase the spawn counter
+		
 
 		// do we still have enemies left to spawn?
 		if (SpawnCount < SpawnGroupSize)

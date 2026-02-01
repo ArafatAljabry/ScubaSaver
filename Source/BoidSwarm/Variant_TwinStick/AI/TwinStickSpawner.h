@@ -45,11 +45,11 @@ protected:
 
 	/** Min time delay between individual NPC spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 2, Units = "s"))
-	float MinSpawnDelay = 0.33f;
+	float MinSpawnDelay = 1.0f;
 
 	/** Max time delay between individual NPC spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 2, Units = "s"))
-	float MaxSpawnDelay = 0.66f;
+	float MaxSpawnDelay = 2.0f;
 
 	/** Radius around the spawner where it can spawn NPCs */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20000, Units = "cm"))

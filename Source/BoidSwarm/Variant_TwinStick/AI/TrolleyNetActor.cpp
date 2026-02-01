@@ -53,9 +53,11 @@ void ATrolleyNetActor::BeginPlay()
 	}
 
 	//Make Trawler look at the player 
-	/*ATwinStickPlayerController* playerRef = GetWorld()->GetFirstPlayerController();
-	FRotator SpawnDir = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), playerRef->GetActorLocation());
-	SetActorRotation(SpawnDir);*/
+	ATwinStickPlayerController* playerRef = (ATwinStickPlayerController*)GetWorld()->GetFirstPlayerController();
+	if (!playerRef)
+		return;
+	FRotator SpawnDir = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), playerRef->GetPawn()->GetActorLocation());
+	SetActorRotation(SpawnDir);
 }
 
 // Called every frame
