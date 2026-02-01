@@ -150,7 +150,7 @@ public:
 	UUserWidget* PauseMenuWidget;
 	UPROPERTY(EditDefaultsOnly,Category="Ui")
 	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
-
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="UiS")
 	bool isPaused{false};
 	void Pause();
 	void ShowPauseMenu();
@@ -161,7 +161,25 @@ public:
 
 	/** Adds input bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	//The actual song
+	UPROPERTY(BlueprintReadWrite, Category = "Audio")
+	USoundBase* BackgroundMusic;
+	//Component playing it
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Audio")
+	UAudioComponent* MusicComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|UI")
+	USoundBase* PauseMenuMusic;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Audio")
+	UAudioComponent* PauseMenuMusicComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|UI")
+	USoundBase* EndMusic;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	UAudioComponent* EndMusicComponent;
 protected:
 
 

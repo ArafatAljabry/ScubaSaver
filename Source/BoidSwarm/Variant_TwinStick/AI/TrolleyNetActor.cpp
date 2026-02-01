@@ -3,6 +3,8 @@
 
 #include "Variant_TwinStick/AI/TrolleyNetActor.h"
 
+#include "Kismet/GameplayStatics.h"
+
 
 // Sets default values
 ATrolleyNetActor::ATrolleyNetActor()
@@ -19,12 +21,33 @@ ATrolleyNetActor::ATrolleyNetActor()
 
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+
 }
 
 // Called when the game starts or when spawned
 void ATrolleyNetActor::BeginPlay()
 {
 	Super::BeginPlay();
+	//Create the component
+	if (trolleySound)
+	{
+
+		trolleySoundComponent = UGameplayStatics::SpawnSoundAttached(
+			trolleySound,              // Sound to play
+			GetRootComponent(),        // Attach to character mesh
+			NAME_None,                  // No specific socket
+			FVector::ZeroVector,        // No offset
+			FRotator::ZeroRotator,      // No rotation
+			EAttachLocation::SnapToTarget, // Snap to mesh location
+			true,                       // Stop if destroyed
+			1.0f,                       // Volume
+			1.0f,                       // Pitch
+			0.0f,                       // Start at beginning
+			nullptr,                    // Use sound's attenuation
+			nullptr,                    // Use sound's concurrency
+			false                        // Auto destroy when done
+		);
+	}
 }
 
 // Called every frame
