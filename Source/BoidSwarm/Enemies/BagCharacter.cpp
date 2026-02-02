@@ -71,6 +71,15 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 
 	// raise the hit flag
 	bHit = true;
+<<<<<<< Updated upstream
+=======
+	/*GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("outch!")  // Message
+	);*/
+>>>>>>> Stashed changes
 
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
@@ -85,6 +94,16 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	if (FMath::RandRange(0, 100) <20)
 	{
 		//
+<<<<<<< Updated upstream
+=======
+		/*GEngine->AddOnScreenDebugMessage(
+			-1,                      // Key (-1 = new line)
+			5.f,                     // Display time in seconds
+			FColor::Yellow,          // Text color
+			TEXT("im busting")  // Message
+		);*/
+
+>>>>>>> Stashed changes
 		ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
 	}
 

@@ -97,6 +97,21 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 		UE_LOG(LogTemp, Error, TEXT("BoidClass is NOT set on %s"), *GetName());
 		return;
 	}
+<<<<<<< Updated upstream
+=======
+	
+	const int32 AvailableSlots = maxFishNumber - Boids.Num();
+	/*GEngine->AddOnScreenDebugMessage(
+		-1,
+		2.0f,
+		FColor::Yellow,
+		FString::Printf(TEXT("Available: %d"), AvailableSlots)
+	);*/
+	if (AvailableSlots <= 0)
+	{
+		return; // already at cap
+	}
+>>>>>>> Stashed changes
 
 	UWorld* World = GetWorld();
 	if (!World) return;
@@ -124,8 +139,8 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 
 		ABoid* EachBoid = World->SpawnActor<ABoid>(BoidClass, SpawnLocation, SpawnRot, SpawnParams);
 		if (!EachBoid)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn boid %d"), i);
+		{/*
+			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn boid %d"), i);*/
 			continue;
 		}
 
@@ -137,8 +152,8 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 		// Debug:
 		// DrawDebugSphere(World, SpawnLocation, 25.f, 12, FColor::Green, false, 2.f);
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Spawned %d boids. Total: %d"), Count, Boids.Num());
+	/*
+	UE_LOG(LogTemp, Warning, TEXT("Spawned %d boids. Total: %d"), Count, Boids.Num());*/
 }
 
 
@@ -330,6 +345,16 @@ void ATwinStickCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+<<<<<<< Updated upstream
+=======
+	/*
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		2.0f,
+		FColor::Yellow,
+		FString::Printf(TEXT("Doids size: %d"), Boids.Num())
+	);*/
+>>>>>>> Stashed changes
 	// get the current rotation
 	const FRotator OldRotation = GetActorRotation();
 
