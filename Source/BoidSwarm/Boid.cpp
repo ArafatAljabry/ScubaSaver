@@ -6,9 +6,11 @@
 #include "TrolleyNetActor.h"
 #include <Kismet/KismetMathLibrary.h>
 
+#include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Enemies/BagCharacter.h"
 #include "Engine/Engine.h" //debug messages
+#include "Kismet/GameplayStatics.h"
 
 
 TArray<TWeakObjectPtr<ABoid>> ABoid::AllBoids;
@@ -73,8 +75,27 @@ void ABoid::updateHealth(float num)
 	health = FMath::Clamp(newHealth, 0.f, maxHealth);
 	if (health == 0)
 	{
-		Destroy();
+
+		//Play sound
+		if (!DeathSound)
+		{
+			return;
+		}
+		//Create the component
+		DeathAudioComp = UGameplayStatics::SpawnSound2D(
+			this,
+			DeathSound,
+			1.0f,      // Volume
+			1.0f,      // Pitch
+			0.0f,      // Start time
+			nullptr,   // Concurrency
+			true,      // Persist
+			false      // Don't auto destroy
+		);
+		if (DeathAudioComp)
+			DeathAudioComp->Play();
 		spawner->DeleteBoidFromArray(this);
+		Destroy();
 	}
 
 	
@@ -110,7 +131,10 @@ void ABoid::BeginPlay()
 
 	OrbitPhase = FMath::FRandRange(0.f, 1000.f);
 
+GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsuleBeginOverlap);
 }
+
+
 
 // DANGER ZONE
 
@@ -213,7 +237,6 @@ void ABoid::Tick(float DeltaTime)
 	if (Radius == FVector::ZeroVector || Center == FVector::ZeroVector) {
 		if (spawner == nullptr) return;
 		Radius = FVector(spawner->radius, spawner->radius, spawner->radius / 2.0f);
-		GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsuleBeginOverlap);
 	}
 
 

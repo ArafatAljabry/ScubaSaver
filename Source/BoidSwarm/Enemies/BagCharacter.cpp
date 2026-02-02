@@ -46,18 +46,27 @@ void ABagCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ABagCharacter::Killed()
 {
-	if (SoundBase)
+	if (!SoundBase)
 	{
-		// Play sound
-		UGameplayStatics::PlaySoundAtLocation(this, SoundBase, GetActorLocation());
-
-		// Delay destruction
-		FTimerHandle DeathTimer;
-		GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &ABagCharacter::DestroyActor, 0.5f, false);
+		return;
 	}
+	//Create the component
+	SoundComponent = UGameplayStatics::SpawnSound2D(
+		this,
+		SoundBase,
+		1.0f,      // Volume
+		1.0f,      // Pitch
+		0.0f,      // Start time
+		nullptr,   // Concurrency
+		true,      // Persist
+		false      // Don't auto destroy
+	);
+	if (SoundComponent)
+		SoundComponent->Play();
 }
 void ABagCharacter::DestroyActor()
 {
+	Killed();
 	Destroy();
 }
 
@@ -117,11 +126,7 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	// spawn the NPC destruction proxy
 	ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
 
-	// hide this actor
-	SetActorHiddenInGame(true);
-
-	// disable collision
-	SetActorEnableCollision(false);
+	DestroyActor();
 
 	// defer destruction
 	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 0.1, false);
