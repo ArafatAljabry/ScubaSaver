@@ -32,6 +32,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	USoundBase* DeathSound;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UAudioComponent* DeathAudioComp;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

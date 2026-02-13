@@ -23,7 +23,7 @@ class ATwinStickPickup : public AActor
 
 	/** Provides visual representation for the pickup */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Mesh;
+	USkeletalMeshComponent* Mesh;
 
 public:	
 

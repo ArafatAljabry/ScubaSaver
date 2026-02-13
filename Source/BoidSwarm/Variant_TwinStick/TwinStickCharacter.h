@@ -124,6 +124,9 @@ protected:
 	/** Timer to handle stick autofire */
 	FTimerHandle AutoFireTimer;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	float maxFishNumber;
+
 public:
 	
 	/** Constructor */
@@ -282,5 +285,8 @@ public:
 
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boids")
 		FVector SwarmCenter = FVector::ZeroVector;
+
+
+		void DeleteBoidFromArray(ABoid* Boid);
 
 };

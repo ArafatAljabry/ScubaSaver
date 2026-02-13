@@ -6,9 +6,11 @@
 #include "TrolleyNetActor.h"
 #include <Kismet/KismetMathLibrary.h>
 
+#include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Enemies/BagCharacter.h"
 #include "Engine/Engine.h" //debug messages
+#include "Kismet/GameplayStatics.h"
 
 
 TArray<TWeakObjectPtr<ABoid>> ABoid::AllBoids;
@@ -71,7 +73,33 @@ void ABoid::updateHealth(float num)
 {
 	float newHealth = health + num;
 	health = FMath::Clamp(newHealth, 0.f, maxHealth);
-	//if (health == 0) { Destroy(); } // Fish die when HP equals 0, duh.
+	if (health == 0)
+	{
+
+		//Play sound
+		if (!DeathSound)
+		{
+			return;
+		}
+		//Create the component
+		DeathAudioComp = UGameplayStatics::SpawnSound2D(
+			this,
+			DeathSound,
+			1.0f,      // Volume
+			1.0f,      // Pitch
+			0.0f,      // Start time
+			nullptr,   // Concurrency
+			true,      // Persist
+			false      // Don't auto destroy
+		);
+		if (DeathAudioComp)
+			DeathAudioComp->Play();
+		spawner->DeleteBoidFromArray(this);
+		Destroy();
+	}
+
+	
+	// Fish die when HP equals 0, duh.
 	//else {
 	//	float RedTint = (1-((maxHealth*health)/100)/100);
 	//	RedTint = FMath::Clamp(RedTint, 0.0f, 1.0f);
@@ -103,8 +131,10 @@ void ABoid::BeginPlay()
 
 	OrbitPhase = FMath::FRandRange(0.f, 1000.f);
 
-	health = maxHealth;
+GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsuleBeginOverlap);
 }
+
+
 
 // DANGER ZONE
 
@@ -202,15 +232,16 @@ void ABoid::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (!spawner) return;
+
 	
 	if (Radius == FVector::ZeroVector || Center == FVector::ZeroVector) {
 		if (spawner == nullptr) return;
 		Radius = FVector(spawner->radius, spawner->radius, spawner->radius / 2.0f);
-		GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsuleBeginOverlap);
 	}
 
 
 	const FVector MyPos = GetActorLocation();
+	const FVector MyFowardVector = GetActorForwardVector();
 	const FVector SwarmCenter = Center + PersonalOffset;
 
 
@@ -238,7 +269,7 @@ void ABoid::Tick(float DeltaTime)
 			SetActorRotation(NewQ);
 		}
 
-		AddActorWorldOffset(GetActorForwardVector() * speed * DeltaTime, true);
+		AddActorWorldOffset(MyFowardVector * speed * DeltaTime, true);
 		return;
 	}
 	else
@@ -306,7 +337,7 @@ void ABoid::Tick(float DeltaTime)
 		AvgHeading /= Neighbours.Num();
 		AvgPos /= Neighbours.Num();
 
-		Ali = (AvgHeading - GetActorForwardVector());
+		Ali = (AvgHeading - MyFowardVector);
 		Coh = (AvgPos - MyPos); 
 	}
 
@@ -338,7 +369,7 @@ void ABoid::Tick(float DeltaTime)
 
 
 	FVector DesiredDir =
-		GetActorForwardVector() +
+		MyFowardVector +
 		FlockForce +
 		Orbit * OrbitWeight +
 		CenterPull * CenterPullWeight;
@@ -361,7 +392,7 @@ void ABoid::Tick(float DeltaTime)
 
 	// DANGER ZONE end!!!
 
-	AddActorWorldOffset(GetActorForwardVector() * speed * DeltaTime);
+	AddActorWorldOffset(MyFowardVector * speed * DeltaTime);
 
 }
 

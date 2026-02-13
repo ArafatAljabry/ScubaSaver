@@ -4,6 +4,11 @@
 #include "Variant_TwinStick/AI/TrolleyNetActor.h"
 
 #include "Kismet/GameplayStatics.h"
+#include <TwinStickCharacter.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <TwinStickPlayerController.h>
+
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -48,6 +53,14 @@ void ATrolleyNetActor::BeginPlay()
 			false                        // Auto destroy when done
 		);
 	}
+	trolleySoundComponent->Play();
+
+	//Make Trawler look at the player 
+	ATwinStickPlayerController* playerRef = (ATwinStickPlayerController*)GetWorld()->GetFirstPlayerController();
+	if (!playerRef)
+		return;
+	FRotator SpawnDir = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), playerRef->GetPawn()->GetActorLocation());
+	SetActorRotation(SpawnDir);
 }
 
 // Called every frame

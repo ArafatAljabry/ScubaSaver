@@ -26,7 +26,7 @@ ATwinStickPickup::ATwinStickPickup()
 	CollisionSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	// create the mesh
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(CollisionSphere);
 
 	Mesh->SetCollisionProfileName(FName("NoCollision"));

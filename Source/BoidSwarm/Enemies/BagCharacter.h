@@ -23,6 +23,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void DestroyActor();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -50,7 +52,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Pickup")
 	TSubclassOf<ATwinStickPickup> PickupClass;
 
+	UPROPERTY(EditAnywhere, Category = "Pickup")
+	float FishSpawnPercentage = 0;
+
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* SoundBase;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAudioComponent* SoundComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
 	bool bHit = false;

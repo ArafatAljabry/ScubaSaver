@@ -7,7 +7,9 @@
 #include "TwinStickGameMode.h"
 #include "TwinStickNPCDestruction.h"
 #include "TwinStickPickup.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABagCharacter::ABagCharacter()
@@ -44,7 +46,27 @@ void ABagCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ABagCharacter::Killed()
 {
-
+	if (!SoundBase)
+	{
+		return;
+	}
+	//Create the component
+	SoundComponent = UGameplayStatics::SpawnSound2D(
+		this,
+		SoundBase,
+		1.0f,      // Volume
+		1.0f,      // Pitch
+		0.0f,      // Start time
+		nullptr,   // Concurrency
+		true,      // Persist
+		false      // Don't auto destroy
+	);
+	if (SoundComponent)
+		SoundComponent->Play();
+}
+void ABagCharacter::DestroyActor()
+{
+	Killed();
 	Destroy();
 }
 
@@ -71,15 +93,12 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 
 	// raise the hit flag
 	bHit = true;
-<<<<<<< Updated upstream
-=======
-	/*GEngine->AddOnScreenDebugMessage(
+	GEngine->AddOnScreenDebugMessage(
 		-1,                      // Key (-1 = new line)
 		5.f,                     // Display time in seconds
 		FColor::Yellow,          // Text color
 		TEXT("outch!")  // Message
-	);*/
->>>>>>> Stashed changes
+	);
 
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
@@ -91,30 +110,23 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	}
 
 	// randomly spawn a pickup
-	if (FMath::RandRange(0, 100) <20)
+	if (FMath::RandRange(0, 100) <= FishSpawnPercentage)
 	{
 		//
-<<<<<<< Updated upstream
-=======
-		/*GEngine->AddOnScreenDebugMessage(
+		GEngine->AddOnScreenDebugMessage(
 			-1,                      // Key (-1 = new line)
 			5.f,                     // Display time in seconds
 			FColor::Yellow,          // Text color
 			TEXT("im busting")  // Message
-		);*/
+		);
 
->>>>>>> Stashed changes
 		ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
 	}
 
 	// spawn the NPC destruction proxy
 	ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
 
-	// hide this actor
-	SetActorHiddenInGame(true);
-
-	// disable collision
-	SetActorEnableCollision(false);
+	DestroyActor();
 
 	// defer destruction
 	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 0.1, false);

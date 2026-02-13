@@ -25,6 +25,7 @@
 ATwinStickCharacter::ATwinStickCharacter()
 {
  	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickInterval = 0.033;
 
 	// create the spring arm
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
@@ -97,26 +98,24 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 		UE_LOG(LogTemp, Error, TEXT("BoidClass is NOT set on %s"), *GetName());
 		return;
 	}
-<<<<<<< Updated upstream
-=======
-	
+
 	const int32 AvailableSlots = maxFishNumber - Boids.Num();
-	/*GEngine->AddOnScreenDebugMessage(
+	GEngine->AddOnScreenDebugMessage(
 		-1,
 		2.0f,
 		FColor::Yellow,
 		FString::Printf(TEXT("Available: %d"), AvailableSlots)
-	);*/
+	);
 	if (AvailableSlots <= 0)
 	{
 		return; // already at cap
 	}
->>>>>>> Stashed changes
 
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	spawnOrigin = GetActorLocation();
+	//Count = FMath::Min(Count, AvailableSlots);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -124,9 +123,9 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	SpawnParams.SpawnCollisionHandlingOverride =
 		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	Boids.Reserve(Boids.Num() + Count);
+	Boids.Reserve(Boids.Num() + AvailableSlots);
 
-	for (int32 i = 0; i < Count; ++i)
+	for (int32 i = 0; i < AvailableSlots; ++i)
 	{
 		const FVector SpawnLocation =
 			spawnOrigin + FVector(
@@ -139,8 +138,8 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 
 		ABoid* EachBoid = World->SpawnActor<ABoid>(BoidClass, SpawnLocation, SpawnRot, SpawnParams);
 		if (!EachBoid)
-		{/*
-			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn boid %d"), i);*/
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn boid %d"), i);
 			continue;
 		}
 
@@ -152,10 +151,22 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 		// Debug:
 		// DrawDebugSphere(World, SpawnLocation, 25.f, 12, FColor::Green, false, 2.f);
 	}
-	/*
-	UE_LOG(LogTemp, Warning, TEXT("Spawned %d boids. Total: %d"), Count, Boids.Num());*/
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawned %d boids. Total: %d"), Count, Boids.Num());
 }
 
+void ATwinStickCharacter::DeleteBoidFromArray(ABoid* Boid)
+{
+	if (!Boid)
+	{
+		return;
+	}
+
+	Boids.RemoveSingleSwap(Boid);
+
+	
+
+}
 
 
 void ATwinStickCharacter::BeginPlay()
@@ -345,16 +356,13 @@ void ATwinStickCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-<<<<<<< Updated upstream
-=======
-	/*
+
 	GEngine->AddOnScreenDebugMessage(
 		-1,
 		2.0f,
 		FColor::Yellow,
 		FString::Printf(TEXT("Doids size: %d"), Boids.Num())
-	);*/
->>>>>>> Stashed changes
+	);
 	// get the current rotation
 	const FRotator OldRotation = GetActorRotation();
 
@@ -419,7 +427,7 @@ void ATwinStickCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Pause);
 
 		//EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::Shoot);
-		EnhancedInputComponent->BindAction(AoEAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::AoEAttack);
+		//EnhancedInputComponent->BindAction(AoEAction, ETriggerEvent::Triggered, this, &ATwinStickCharacter::AoEAttack);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ATwinStickCharacter::OnLeftMousePressed);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &ATwinStickCharacter::OnLeftMouseReleased);
 
@@ -596,6 +604,7 @@ void ATwinStickCharacter::DoAoEAttack()
 	// do we have enough items to do an AoE attack?
 	if (Items > 0)
 	{
+		
 		// get the game time
 		const float GameTime = GetWorld()->GetTimeSeconds();
 
@@ -624,13 +633,15 @@ void ATwinStickCharacter::DoAoEAttack()
 void ATwinStickCharacter::HandleDamage(float Damage, const FVector& DamageDirection)
 {
 	// calculate the knockback vector
-	FVector LaunchVector = DamageDirection;
-	LaunchVector.Z = 0.0f;
+	//FVector LaunchVector = DamageDirection;
+	//LaunchVector.Z = 0.0f;
 
-	// apply knockback to the character
-	LaunchCharacter(LaunchVector * KnockbackStrength, true, true);
+	//// apply knockback to the character
+	//LaunchCharacter(LaunchVector * KnockbackStrength, true, true);
 
 	// pass control to BP
+
+
 	BP_Damaged();
 }
 
@@ -641,6 +652,8 @@ void ATwinStickCharacter::AddPickup()
 
 	// update the items counter
 	UpdateItems();
+	DoAoEAttack();
+
 }
 
 void ATwinStickCharacter::UpdateItems()
