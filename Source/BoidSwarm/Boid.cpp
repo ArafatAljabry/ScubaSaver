@@ -121,16 +121,6 @@ void ABoid::BeginPlay()
 	Radius = FVector(spawner->radius, spawner->radius, spawner->radius / 2.0f);
 	Center = spawner->spawnOrigin;
 
-	PersonalOffset = FVector(
-		FMath::FRandRange(-Radius.X * 0.3f, Radius.X * 0.3f),
-		FMath::FRandRange(-Radius.Y * 0.3f, Radius.Y * 0.3f),
-		0.f
-	);
-
-	OrbitSign = (FMath::RandBool() ? 1.f : -1.f);
-
-	OrbitPhase = FMath::FRandRange(0.f, 1000.f);
-
 GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsuleBeginOverlap);
 }
 
@@ -138,93 +128,38 @@ GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsul
 
 // DANGER ZONE
 
-void ABoid::GetNeighbours(TArray<ABoid*>& OutNeighbours) const
+//I need to have one central boid with an index 0, and the rest of the boids to spawn at a 137.5 degree angle separation from the previous one.
+
+void ABoid::AssignPosition(const TArray<AActor*>& Actors, const FVector& Center, float DistanceIncrement)
 {
-	OutNeighbours.Reset();
+	constexpr float GoldenAngleDegrees = 137.5f;
+	constexpr float GoldenAngleRadians = FMath::DegreesToRadians(GoldenAngleDegrees);
 
-	const FVector MyPos = GetActorLocation();
-	const float R2 = NeighbourRadius * NeighbourRadius;
-
-	// Clean stale pointers occasionally
-	// (You can do this less often if perf matters)
-	for (int32 i = AllBoids.Num() - 1; i >= 0; --i)
+	for (int32 Index = 0; Index < Actors.Num(); ++Index)
 	{
-		ABoid* B = AllBoids[i].Get();
-		if (!B)
+		AActor* Actor = Actors[Index];
+		if (!IsValid(Actor))
 		{
-			AllBoids.RemoveAtSwap(i);
-			continue;
+			continue; // Skip if null or eliminated
 		}
-		if (B == this) continue;
 
-		const float DistSq = FVector::DistSquared(MyPos, B->GetActorLocation());
-		if (DistSq <= R2)
-		{
-			OutNeighbours.Add(B);
-		}
+		// Calculate angle and radius for this index
+		float Angle = Index * GoldenAngleRadians;
+		float Radius = DistanceIncrement * Index;
+
+		// Calculate new location on XY plane
+		FVector NewLocation;
+		NewLocation.X = Center.X + Radius * FMath::Cos(Angle);
+		NewLocation.Y = Center.Y + Radius * FMath::Sin(Angle);
+		NewLocation.Z = Center.Z;
+
+		// Set actor location without physics sweep
+		Actor->SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
 	}
 }
-
-FVector ABoid::GetSeparation(const TArray<ABoid*>& Neighbours) const
-{
-	FVector Force = FVector::ZeroVector;
-	const FVector MyPos = GetActorLocation();
-	const float SepR2 = SeparationRadius * SeparationRadius;
-
-	for (ABoid* N : Neighbours)
-	{
-		if (!N) continue;
-
-		const FVector Delta = MyPos - N->GetActorLocation();
-		const float DistSq = Delta.SizeSquared();
-		if (DistSq < KINDA_SMALL_NUMBER) continue;
-
-		// optional: apply only inside separation radius
-		if (DistSq > SepR2) continue;
-
-		// normalize(direction) / |direction|  == direction / |direction|^2
-		Force += Delta / DistSq;
-	}
-
-	return Force; // not normalized yet; caller may normalize
-}
-
-FVector ABoid::GetAlignment(const TArray<ABoid*>& Neighbours) const
-{
-	if (Neighbours.Num() == 0) return FVector::ZeroVector;
-
-	FVector AvgHeading = FVector::ZeroVector;
-	for (ABoid* N : Neighbours)
-	{
-		if (!N) continue;
-		AvgHeading += N->GetActorForwardVector();
-	}
-
-	AvgHeading /= FMath::Max(1, Neighbours.Num());
-
-	// average - heading
-	return (AvgHeading - GetActorForwardVector());
-}
-
-FVector ABoid::GetCohesion(const TArray<ABoid*>& Neighbours) const
-{
-	if (Neighbours.Num() == 0) return FVector::ZeroVector;
-
-	FVector localCenter = FVector::ZeroVector;
-	for (ABoid* N : Neighbours)
-	{
-		if (!N) continue;
-		localCenter += N->GetActorLocation();
-	}
-
-	localCenter /= FMath::Max(1, Neighbours.Num());
-
-	// seek(center): desired direction to center (not full seek with velocity, just direction)
-	return (localCenter - GetActorLocation());
-}
-
 
 // DANGER ZONE end
+
 
 // Called every frame
 void ABoid::Tick(float DeltaTime)
@@ -283,72 +218,12 @@ void ABoid::Tick(float DeltaTime)
 
 	// DANGER ZONE !!!
 
-	TArray<ABoid*> Neighbours;
-	Neighbours.Reserve(16);
-
-	const float NeighR2 = NeighbourRadius * NeighbourRadius;
-
-	for (int32 i = AllBoids.Num() - 1; i >= 0; --i)
-	{
-		ABoid* B = AllBoids[i].Get();
-		if (!B)
-		{
-			AllBoids.RemoveAtSwap(i);
-			continue;
-		}
-		if (B == this) continue;
-
-		if (FVector::DistSquared(MyPos, B->GetActorLocation()) <= NeighR2)
-		{
-			Neighbours.Add(B);
-		}
-	}
 
 	// !!!
 
 	FVector Sep = FVector::ZeroVector;
 	FVector Ali = FVector::ZeroVector;
 	FVector Coh = FVector::ZeroVector;
-
-	if (Neighbours.Num() > 0)
-	{
-		// separation
-		const float SepR2 = SeparationRadius * SeparationRadius;
-		for (ABoid* N : Neighbours)
-		{
-			const FVector Delta = MyPos - N->GetActorLocation();
-			const float DistSq = Delta.SizeSquared();
-			if (DistSq < KINDA_SMALL_NUMBER) continue;
-			if (DistSq > SepR2) continue;
-
-			Sep += Delta / DistSq; 
-		}
-
-		// alignment
-		FVector AvgHeading = FVector::ZeroVector;
-		FVector AvgPos = FVector::ZeroVector;
-
-		for (ABoid* N : Neighbours)
-		{
-			AvgHeading += N->GetActorForwardVector();
-			AvgPos += N->GetActorLocation();
-		}
-
-		AvgHeading /= Neighbours.Num();
-		AvgPos /= Neighbours.Num();
-
-		Ali = (AvgHeading - MyFowardVector);
-		Coh = (AvgPos - MyPos); 
-	}
-
-	//if (!Sep.IsZero()) Sep = Sep.GetSafeNormal();
-	//if (!Ali.IsZero()) Ali = Ali.GetSafeNormal();
-	//if (!Coh.IsZero()) Coh = Coh.GetSafeNormal();
-
-	const FVector FlockForce =
-		Sep * SeparationWeight +
-		Ali * AlignmentWeight +
-		Coh * CohesionWeight;
 
 
 	const FVector ToCenter = (Center - MyPos);
@@ -368,13 +243,9 @@ void ABoid::Tick(float DeltaTime)
 	}
 
 
-	FVector DesiredDir =
-		MyFowardVector +
-		FlockForce +
-		Orbit * OrbitWeight +
-		CenterPull * CenterPullWeight;
+	FVector DesiredDir;
 
-	//DesiredDir = DesiredDir.GetSafeNormal();
+	DesiredDir = DesiredDir.GetSafeNormal();
 
 	//try FQuat LookAt() then Slerp
 

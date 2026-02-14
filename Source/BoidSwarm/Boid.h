@@ -36,6 +36,7 @@ public:
 	USoundBase* DeathSound;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UAudioComponent* DeathAudioComp;
+	void AssignPosition(const TArray<AActor*>& Actors, const FVector& Center, float DistanceIncrement);
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
