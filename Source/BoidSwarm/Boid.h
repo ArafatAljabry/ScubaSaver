@@ -16,6 +16,12 @@ class BOIDSWARM_API ABoid : public ACharacter
 {
 	GENERATED_BODY()
 
+	// Brand New Stuff
+public:
+	UFUNCTION(BlueprintCallable, Category = "Spiral Arrangement")
+	void ArrangeActorsInSpiral(const TArray<ABoid*>& Actors, const FVector& Center, float DistanceIncrement);
+	// Brand New Stuff end
+
 public:
 	// Sets default values for this character's properties
 	ABoid();
@@ -67,13 +73,13 @@ public:
 	float SeparationStrength = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Boids")
-	float SeparationRadius = 20.f;
+	float SeparationRadius = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Boids")
 	float SeparationDamping = 6.f;
 	// Stay close
 	UPROPERTY(EditAnywhere, Category = "Boids")
-	float NeighbourRadius = 45.f;
+	float NeighbourRadius = 145.f;
 
 
 	//Weighting behavior, can be used for different emotions/boid states

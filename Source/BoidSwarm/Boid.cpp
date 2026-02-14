@@ -20,6 +20,36 @@ FQuat LookAt(const FVector& lookAt, const FVector& upDirection) {
 	return FRotationMatrix::MakeFromXZ(lookAt, upDirection).ToQuat();
 }
 
+void ABoid::ArrangeActorsInSpiral(const TArray<ABoid*>& Actors, const FVector& SpiralCenter, float DistanceIncrement)
+{
+	constexpr float GoldenAngleDegrees = 137.5f;
+	constexpr float GoldenAngleRadians = FMath::DegreesToRadians(GoldenAngleDegrees);
+
+	for (int32 Index = 0; Index < Actors.Num(); ++Index)
+	{
+		AActor* Actor = Actors[Index];
+		if (!IsValid(Actor))
+		{
+			continue; // Skip if null or eliminated
+		}
+
+		// Calculate angle and radius for this index
+		float Angle = Index * GoldenAngleRadians;
+		float SpiralRadius = DistanceIncrement * Index;
+
+		// Calculate new location on XY plane
+		FVector NewLocation;
+		NewLocation.X = Center.X + SpiralRadius * FMath::Cos(Angle);
+		NewLocation.Y = Center.Y + SpiralRadius * FMath::Sin(Angle);
+		NewLocation.Z = Center.Z /* + FMath::Sin(Index)*/; // + sin function?
+
+		// Set actor location without physics sweep
+		//Actor->SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
+
+		//Code to readjust the follow point
+	}
+}
+
 // Sets default values
 ABoid::ABoid()
 {
