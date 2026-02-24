@@ -27,6 +27,11 @@ public:
 protected:
 
 	AActor* Owner;
+
+	TArray<float>Phase;
+	TArray<float>PitchOffset;
+	
+
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Swarm")
 	int MaxFish;
@@ -56,6 +61,9 @@ public:
 
 	UFUNCTION()
 	void Orbit(float Deltatime);
+
+	UFUNCTION()
+	FQuat LookAt(const FVector& lookAt, const FVector& upDirection);
 
 
 };

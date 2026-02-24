@@ -53,6 +53,9 @@ void USwarmComponent::AddFish()
 
 	FishList.Add(newFish);
 
+	Phase.Add(FMath::RandRange(0.0f, 2 * PI));
+	PitchOffset.Add(FMath::RandRange(-1.5, 1.5));
+
 }
 
 void USwarmComponent::KillFish()
@@ -68,33 +71,61 @@ void USwarmComponent::KillFish()
 
 void USwarmComponent::Orbit(float Deltatime)
 {
-	if (FishList.Num() == 0)
+	const int32 Fishlist = FishList.Num();
+	if (Fishlist == 0)
 	{
 		return;
 	}
 
-	FVector Center = Owner->GetActorLocation();
-
 	yawOffset += swarmSpeed*Deltatime; 
-	float angleStep = 2 * PI / FishList.Num();
 
+	const FTransform OwnerTransform = Owner->GetActorTransform();
+	const FVector Center = OwnerTransform.GetLocation();
+	const FVector Foward = OwnerTransform.GetUnitAxis(EAxis::X);
+	const FVector Up = OwnerTransform.GetUnitAxis(EAxis::Z);
+	const FVector Right = OwnerTransform.GetUnitAxis(EAxis::Y);
 
-	for (int i = 0; i < FishList.Num(); ++i)
+	
+	for (int32 i = 0; i < Fishlist; ++i)
 	{
+
 		AActor* fish = FishList[i];
-
-		float yaw = i * angleStep  + yawOffset;
-		float pitch = FMath::Sin(i * 2.3f + yawOffset * 0.7f) * (PI / 2.0f);
-
-		FVector Offset = FVector(FMath::Cos(pitch) * FMath::Cos(yaw) * OrbitRadius,FMath::Cos(pitch) * FMath::Sin(yaw) * OrbitRadius, FMath::Sin(pitch) * OrbitRadius);
+		
+		const float Yaw = Phase[i] + yawOffset ;
+		const float Pitch = FMath::Sin(i*2.3f + yawOffset * 0.7) * (PI / 6.0);
 
 		
-		FVector target = Center + Offset;
+		float YawCos, YawSin;
+		FMath::SinCos(&YawSin,&YawCos,Yaw);
+		float PitchSin, PitchCos;
+		FMath::SinCos(&PitchSin,&PitchCos,Pitch);
 
-		fish->SetActorLocation(target);
-		fish->SetActorRotation((Center - target).Rotation());
+		
+		FVector direction = Right * (YawCos * PitchCos) * OrbitRadius + Foward * (YawSin * PitchCos) * OrbitRadius + Up * PitchSin * OrbitRadius;
+		const FVector Target = direction + Center;
+		const FVector newPos = FMath::VInterpTo(fish->GetActorLocation(), Target, Deltatime, 12.0f);
+
+		fish->SetActorLocation(newPos , false);
+
+		const FVector MovementDir = (Target-fish->GetActorLocation()).GetSafeNormal();
+		const FQuat rotationWhileTurning = FQuat::Slerp(fish->GetActorQuat(), LookAt(MovementDir, Up), 0.12f);
+
+		
+		fish->SetActorRotation(rotationWhileTurning);
+
 	}
+	
 
+}
+
+
+
+
+FQuat USwarmComponent::LookAt(const FVector& lookAt, const FVector& upDirection)
+{
+
+
+	return FRotationMatrix::MakeFromXZ(lookAt,upDirection).ToQuat();
 
 }
 

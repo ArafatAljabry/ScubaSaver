@@ -40,7 +40,7 @@ private:
 
 public:
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
 	USwarmComponent* Swarm;
 
 };
