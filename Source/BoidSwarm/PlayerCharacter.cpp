@@ -7,7 +7,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-
+#include "Animation/AnimationAsset.h"
+	
 #include "PlayerCharacter.h"
 
 // Sets default values
@@ -27,23 +28,20 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bConstrainToPlane = true;
 	GetCharacterMovement()->bSnapToPlaneAtStart = true;
 
-	//Create scene component and set it as root
-	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
-	RootComponent = SceneComponent;
 	// Create the camera boom component
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	m_CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->SetUsingAbsoluteRotation(true);
-	CameraBoom->TargetArmLength = 800.f;
-	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
-	CameraBoom->bDoCollisionTest = false;
+	m_CameraBoom->SetupAttachment(GetRootComponent());
+	m_CameraBoom->SetUsingAbsoluteRotation(true);
+	m_CameraBoom->TargetArmLength = 800.f;
+	m_CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
+	m_CameraBoom->bDoCollisionTest = false;
 
 	// Create the camera component
-	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
+	m_TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 
-	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	TopDownCameraComponent->bUsePawnControlRotation = false;
+	m_TopDownCameraComponent->SetupAttachment(m_CameraBoom, USpringArmComponent::SocketName);
+	m_TopDownCameraComponent->bUsePawnControlRotation = false;
 
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
@@ -56,40 +54,45 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (int32 i = 0; i < FishCount; i++)
+	for (int32 i = 0; i < m_FishCount; i++)
 	{
 		FString name = FString::Printf(TEXT("Fish_%d"), i);
 		USkeletalMeshComponent* Fish = NewObject<USkeletalMeshComponent>(this, *name);
 
-		Fish->RegisterComponent();
-		Fish->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-
-		if (FishMesh)
+		
+		if (!m_FishMesh)
 		{
-			Fish->SetSkeletalMesh(FishMesh);
+			UE_LOG(LogTemp, Warning, TEXT("Fish mesh not set"));
 		}
+		Fish->SetupAttachment(GetRootComponent());
+		Fish->SetMobility(EComponentMobility::Movable);
+		Fish->SetRelativeScale3D(FVector(1.0f)); //Scale the fish, they be too big
+		Fish->RegisterComponent();
+		Fish->SetVisibility(true);
+		
 
-		if (SwimAnimation)
+		if (m_SwimAnimation)
 		{
 			Fish->SetAnimationMode(EAnimationMode::AnimationSingleNode);
-			Fish->SetAnimation(SwimAnimation);
+			Fish->SetAnimation(m_SwimAnimation);
 			Fish->Play(true); // Loop animation
 		}
 
 		// Random initial location
 		Fish->SetRelativeLocation(FVector(FMath::FRandRange(-300.0f, 300.0f),
-			FMath::FRandRange(-300.0f, 300.0f),
-			FMath::FRandRange(-100.0f, 100.0f)));
+										  FMath::FRandRange(-300.0f, 300.0f),
+										  FMath::FRandRange(-100.0f, 100.0f)));
 
-		FishComponents.Add(Fish);
+		m_FishComponents.Add(Fish);
 
 		//Creating a boid implicitly linked to this mesh since it is created at the same time,
 		//and has the same index in the array
-		FBoid boid;
+		FBoidData boid;
 		boid.Position = Fish->GetRelativeLocation();
 		boid.Velocity = FMath::VRand() * 100.f;
 		Boids.Add(boid);
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Fish created: %d"), m_FishComponents.Num());
 }
 
 // Called every frame
@@ -98,23 +101,27 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-
-	for (FBoid i : Boids)
+	for (int a = 0; a < m_FishCount; a++)
 	{
-		//Reseting values at start
+		FBoidData& i = Boids[a];
+		
+		//Resetting values at start
 		FVector separationForce = FVector::ZeroVector;
-		FVector alignmentForce = FVector::ZeroVector;
-		FVector cohesionForce = FVector::ZeroVector;
+		FVector alignmentForce  = FVector::ZeroVector;
+		FVector cohesionForce	= FVector::ZeroVector;
 
 		i.neighbourCount = 0;
+
 		//Computing forces
-		for (FBoid j : Boids)
+		for (int b = 0; b < m_FishCount; b++)
 		{
-			//Seperation
+			FBoidData& j = Boids[b];
 			float distanceFromNeighbour = FVector::Distance(i.Position, j.Position);
-			if(distanceFromNeighbour < NeighborRadius && distanceFromNeighbour > 0)
+			if(distanceFromNeighbour < m_NeighborRadius && distanceFromNeighbour > 0)
 			{
 				i.neighbourCount++;
+				
+				//Seperation
 				FVector awayVec = i.Position - j.Position;
 				
 				//In case of small numbers, we want to avoid the force to be too strong, so we check if the vector is not nearly zero before normalizing it
@@ -122,25 +129,47 @@ void APlayerCharacter::Tick(float DeltaTime)
 				{
 					separationForce += awayVec.GetSafeNormal() / distanceFromNeighbour;
 				}
+
+				//Alignment
+				alignmentForce += j.Velocity;
+
+				//Cohesion
+				cohesionForce += j.Position;
 			}
 		}
-		separationForce /= i.neighbourCount > 0 ? i.neighbourCount : 1; // Avoid division by zero
-		separationForce *= SeparationWeight;
+		//Get mouse input
+		FVector right = GetActorRightVector();
+		FVector up = GetActorUpVector();
 
-		FVector totalForce =	separationForce * SeparationWeight + // acc = w*seperation + w*alignment + w*cohesion
-								alignmentForce  * AlignmentWeight + 
-								cohesionForce	* CohesionWeight;
+		FVector flockTarget = right * m_MouseXInput * m_MouseSensitivity * DeltaTime;
+		flockTarget += up * -m_MouseYInput * m_MouseSensitivity * DeltaTime;
+		flockTarget = flockTarget.GetSafeNormal();
+
+		separationForce /= i.neighbourCount > 0 ? i.neighbourCount : 1; // Avoid division by zero
+
+		alignmentForce /= i.neighbourCount > 0 ? i.neighbourCount : 1; // Avoid division by zero
+		alignmentForce = alignmentForce.Length() > 0 ? alignmentForce.GetSafeNormal() : FVector(1.0f); // Avoid division by zero
+
+		cohesionForce /= i.neighbourCount > 0 ? i.neighbourCount : 1; // Avoid division by zero
+		cohesionForce = (cohesionForce - i.Position).GetSafeNormal(); // Direction towards the center of mass of the neighbors
+
+		FVector totalForce = separationForce * m_SeparationWeight + // acc = w*separation + w*alignment + w*cohesion
+			alignmentForce * m_AlignmentWeight +
+			cohesionForce * m_CohesionWeight;   //+flockTarget;
 
 
 		/*
 		 *  After all the forces are computed, we apply them to the velocity and position of the boid.
 		 */
-		i.Velocity += totalForce * DeltaTime;
-
+		i.Velocity += totalForce;
+		i.Velocity = i.Velocity.GetClampedToMaxSize(m_MaxSpeed); // Limit the velocity to MaxSpeed
+		
 		/* NOTE:Shorthand to limit speed: 
 		 * if/else --> condition ? expression_if_true : expression_if_false
 		 */
-		i.Position += i.Velocity.Length() > MaxSpeed ? i.Velocity.GetSafeNormal() * MaxSpeed : i.Velocity; 
+		i.Position += i.Velocity * DeltaTime;
+
+		m_FishComponents[a]->SetRelativeLocation(i.Position);
 	}
 }
 
@@ -149,4 +178,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	//Turn and LookUp is default axis mapping from project settings
+	InputComponent->BindAxis("Turn", this, &APlayerCharacter::OnMouseX);
+	InputComponent->BindAxis("LookUp", this, &APlayerCharacter::OnMouseY);
+
+}
+
+void APlayerCharacter::OnMouseX(float value)
+{
+	m_MouseXInput = value;
+}
+
+void APlayerCharacter::OnMouseY(float value)
+{
+	m_MouseYInput = value;
 }

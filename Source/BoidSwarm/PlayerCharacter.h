@@ -8,7 +8,7 @@
 
 
 USTRUCT()
-struct FBoid
+struct FBoidData
 {
 	GENERATED_BODY()
 
@@ -38,53 +38,62 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* TopDownCameraComponent;
+	 TObjectPtr<class UCameraComponent> m_TopDownCameraComponent{};
 
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	TObjectPtr<class USpringArmComponent> m_CameraBoom{};
 
-	/** Scenecomponent */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* SceneComponent;
+	UPROPERTY(EditAnywhere, Category = "Flocking")
+	TObjectPtr<USkeletalMesh> m_FishMesh;
 
-	UPROPERTY(EditAnywhere)
-	USkeletalMesh* FishMesh;
-
-	UPROPERTY(EditAnywhere)
-	UAnimationAsset* SwimAnimation;
+	UPROPERTY(EditAnywhere, Category = "Flocking")
+	TObjectPtr<UAnimationAsset> m_SwimAnimation{};
 	
-	TArray<USkeletalMeshComponent*> FishComponents;
+	UPROPERTY()
+	TArray<TObjectPtr<USkeletalMeshComponent>> m_FishComponents{};
 
-	UPROPERTY(EditAnywhere)
-	int32 FishCount{ 10 };
+	UPROPERTY(EditAnywhere, Category ="Flocking")
+	int32 m_FishCount{ 10 };
 
+	UPROPERTY(EditAnywhere, Category = "Flocking")
+	float m_MouseSensitivity{ 500.0f };
+
+private:
 	/** Boid movement */
-	TArray<FBoid> Boids;
+	TArray<FBoidData> Boids;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxSpeed = 200.f;
+	/**On Mouse input*/
+	void OnMouseX(float value);
+	void OnMouseY(float value);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float NeighborRadius = 200.f;
+	float m_MouseXInput{ 0.0f };
+	float m_MouseYInput{ 0.0f };
+public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SeparationWeight = 1.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_MaxSpeed{ 200.f };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AlignmentWeight = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_NeighborRadius{ 200.0f };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CohesionWeight = 1.0f;
-	
-public: 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_SeparationWeight{ 1.5f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_AlignmentWeight{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_CohesionWeight{ 1.0f };
+
 	
 	/** Returns the camera component **/
-	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
+	FORCEINLINE TObjectPtr<class UCameraComponent> GetTopDownCameraComponent() const { return m_TopDownCameraComponent; }
 
 	/** Returns the Camera Boom component **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE TObjectPtr<class USpringArmComponent> GetCameraBoom() const { return m_CameraBoom; }
+
+	
 };
