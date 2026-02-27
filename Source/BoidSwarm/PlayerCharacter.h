@@ -11,10 +11,8 @@ USTRUCT()
 struct FBoidData
 {
 	GENERATED_BODY()
-
-	FVector Position{ FVector::ZeroVector };
 	FVector Velocity{ FVector::ZeroVector };
-
+	FVector Direction{ FVector::ZeroVector };
 	int neighbourCount{ 0 };
 };
 
@@ -71,6 +69,15 @@ private:
 
 	float m_MouseXInput{ 0.0f };
 	float m_MouseYInput{ 0.0f };
+
+	//Sphere collider(container)
+	float m_SizeForOneFish{ 55.f };
+
+	/* Get target under mouse cursor*/
+	bool GetCursorWorldTarget(FVector& OutTarget) const;
+
+	/*Calculate swarm forces*/
+	void calculateSwarmForce(float ); //deltatime
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
@@ -88,7 +95,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
 	float m_CohesionWeight{ 1.0f };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_SeekWeight{ 1.0f };
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
+	float m_MaxSteerForce{ 200.0f };
 	/** Returns the camera component **/
 	FORCEINLINE TObjectPtr<class UCameraComponent> GetTopDownCameraComponent() const { return m_TopDownCameraComponent; }
 
