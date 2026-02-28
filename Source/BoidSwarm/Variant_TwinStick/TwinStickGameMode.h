@@ -6,6 +6,7 @@
 #include "TwinStickCharacter.h"
 #include "TwinStickSpawner.h"
 #include "GameFramework/GameModeBase.h"
+#include "Player/PlayerWidget.h"
 #include "TwinStickGameMode.generated.h"
 
 class UTwinStickUI;
@@ -25,10 +26,10 @@ protected:
 
 	/** Type of UI Widget to spawn */
 	UPROPERTY(EditAnywhere, Category="Twin Stick")
-	TSubclassOf<UTwinStickUI> UIWidgetClass;
+	TSubclassOf<UPlayerWidget> UIWidgetClass;
 
 	/** Pointer to the spawned UI Widget */
-	TObjectPtr<UTwinStickUI> UIWidget;
+	TObjectPtr<UPlayerWidget> UIWidget;
 
 	/** Current game score */
 	int32 Score = 0;
@@ -103,6 +104,11 @@ protected:
 	/** Resets the combo multiplier after the cooldown time expires */
 	void ResetCombo();
 
+	//New Fish Stuff
+
+	void UpdateFishNumber();
+
+
 public:
 
 	UFUNCTION()
@@ -116,4 +122,9 @@ public:
 
 	/** Decreases the NPC count */
 	void DecreaseNPCs();
+
+
+	//New Fish Stuff
+	void GotFish();
+
 };
