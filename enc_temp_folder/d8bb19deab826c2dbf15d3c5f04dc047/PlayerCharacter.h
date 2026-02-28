@@ -11,9 +11,8 @@ USTRUCT()
 struct FBoidData
 {
 	GENERATED_BODY()
-	FVector Velocity	{ FVector::ZeroVector };
-	FVector Direction	{ FVector::ZeroVector };
-	FVector targetOffset{ FVector::ZeroVector }; // Keeps the boids from all seeking the same point
+	FVector Velocity{ FVector::ZeroVector };
+	FVector Direction{ FVector::ZeroVector };
 	int neighbourCount{ 0 };
 };
 

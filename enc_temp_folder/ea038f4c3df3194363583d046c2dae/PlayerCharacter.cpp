@@ -97,11 +97,8 @@ void APlayerCharacter::BeginPlay()
 		//Creating a boid implicitly linked to this mesh since it is created at the same time,
 		//and has the same index in the array
 		FBoidData boid;
-		boid.Direction	  = FVector(FMath::FRandRange(0.f,1.f),0.f,0.f);
-		boid.Velocity	  = boid.Direction * (m_MaxSpeed * 0.5f); //Start at half speed
-		boid.targetOffset = FVector(FMath::FRandRange(-50.0f, 50.0f), 
-									FMath::FRandRange(-50.0f, 50.0f),
-									0.0f);
+		boid.Direction = FVector(FMath::FRandRange(0.f,1.f),0.f,0.f);
+		boid.Velocity = boid.Direction * (m_MaxSpeed * 0.5f); //Start at half speed
 		Boids.Add(boid);
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Fish created: %d"), m_FishComponents.Num());
@@ -111,7 +108,6 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//Move the camera as the mouse moves around
 
 	calculateSwarmForce(DeltaTime);
 	for (int i = 0; i < m_FishCount; ++i)
@@ -120,7 +116,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 		m_FishComponents[i]->AddWorldOffset(Boids[i].Velocity * DeltaTime);
 
 	}
-	
 	
 }
 
@@ -182,7 +177,6 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 	{
 		FBoidData& i = Boids[a]; // Ref to boid A
 		FVector boid_a_position = m_FishComponents[a]->GetComponentLocation();
-		
 		//Resetting values at start
 		FVector separationForce		= FVector::ZeroVector;
 		FVector alignmentForce		= FVector::ZeroVector;
@@ -219,7 +213,7 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 
 		FVector seekTarget{};
 		bool bHasTarget = GetCursorWorldTarget(seekTarget);
-		seekTarget = seekTarget + i.targetOffset;
+
 		alignmentForce /= i.neighbourCount > 0 ? i.neighbourCount : 1; // Avoid division by zero
 		alignmentForce = alignmentForce.GetSafeNormal(); // Avoid division by zero
 
@@ -249,13 +243,14 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 							separationForce * m_SeparationWeight + // acc = w*separation + w*alignment + w*cohesion
 							alignmentForce	* m_AlignmentWeight	 +
 							cohesionForce	* m_CohesionWeight   +
-							seekForce		* m_SeekWeight ;
+							seekForce		* m_SeekWeight;
 
 		/*
 		 *  After all the forces are computed, we apply them to the velocity and position of the boid.
 		 */
-		FVector acc = totalForce;
-		i.Velocity += acc * seekTarget.GetSafeNormal().Length();
+
+		FVector acc = totalForce; // Assuming mass = 1 for simplicity, otherwise we would divide by mass here
+		i.Velocity += acc;	
 		i.Velocity = i.Velocity.GetClampedToMaxSize(m_MaxSpeed);
 		//Direction is normalized velocity
 		i.Direction = i.Velocity.GetSafeNormal();
@@ -264,9 +259,8 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 		{
 			FRotator TargetRotation = i.Direction.ToOrientationRotator();
 			FRotator CurrentRotation = m_FishComponents[a]->GetRelativeRotation();
-			FRotator SmoothedRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, dt, 20.0f);
+			FRotator SmoothedRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, dt, 8.0f);
 			m_FishComponents[a]->SetRelativeRotation(SmoothedRotation);
-			
 		} 
 	}
 }
