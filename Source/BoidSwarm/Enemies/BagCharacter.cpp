@@ -67,6 +67,8 @@ void ABagCharacter::Killed()
 void ABagCharacter::DestroyActor()
 {
 	Killed();
+	
+	//Fade here
 	Destroy();
 }
 
@@ -124,7 +126,7 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	}
 
 	// spawn the NPC destruction proxy
-	ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
+	//ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
 
 	DestroyActor();
 
