@@ -66,7 +66,7 @@ protected:
 
 
 	UPROPERTY()
-	ACharacter* Player;
+	ATwinStickCharacter* Player;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	TArray<ATwinStickSpawner*> Spawners;

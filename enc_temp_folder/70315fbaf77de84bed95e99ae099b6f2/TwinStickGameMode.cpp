@@ -19,7 +19,7 @@ void ATwinStickGameMode::BeginPlay()
 	// create the UI widget and add it to the viewport
 	UIWidget = CreateWidget<UTwinStickUI>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
-	Player =  Cast<ACharacter >(UGameplayStatics::GetPlayerCharacter(this, 0));
+	Player = Cast<ATwinStickCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 	TArray<AActor*> actors;
 	UGameplayStatics::GetAllActorsOfClass(this, ATwinStickSpawner::StaticClass(), actors);

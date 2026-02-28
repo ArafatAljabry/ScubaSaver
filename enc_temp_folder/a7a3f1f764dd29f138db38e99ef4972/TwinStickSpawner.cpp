@@ -55,7 +55,6 @@ void ATwinStickSpawner::SpawnNPCGroup()
 	SpawnCount = 0;
 
 	// check if we're still under the max NPC cap
-
 	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
 	{
 		if (GM->CanSpawnNPCs())

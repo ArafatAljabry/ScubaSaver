@@ -7,6 +7,7 @@
 #include "PlayerCharacter.generated.h"
 
 
+
 USTRUCT()
 struct FBoidData
 {
@@ -37,6 +38,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	 TObjectPtr<class UCameraComponent> m_TopDownCameraComponent{};
@@ -51,6 +53,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Flocking")
 	TObjectPtr<UAnimationAsset> m_SwimAnimation{};
 	
+	UPROPERTY(EditAnywhere, Category = "Flocking")
+	TObjectPtr<class USphereComponent> SphereComp;
+
 	UPROPERTY()
 	TArray<TObjectPtr<USkeletalMeshComponent>> m_FishComponents{};
 
@@ -101,6 +106,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
 	float m_OrbitRadius{ 100.0f };
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
 	float m_MaxSteerForce{ 200.0f };
 
@@ -112,5 +118,5 @@ public:
 	/** Returns the Camera Boom component **/
 	FORCEINLINE TObjectPtr<class USpringArmComponent> GetCameraBoom() const { return m_CameraBoom; }
 
-	
+	void AdjustFishVolume();
 };

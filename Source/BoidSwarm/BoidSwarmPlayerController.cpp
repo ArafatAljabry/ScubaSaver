@@ -16,7 +16,7 @@
 ABoidSwarmPlayerController::ABoidSwarmPlayerController()
 {
 	bIsTouch = false;
-	bMoveToMouseCursor = false;
+	bMoveToMouseCursor = true;
 
 	// configure the controller
 	bShowMouseCursor = true;

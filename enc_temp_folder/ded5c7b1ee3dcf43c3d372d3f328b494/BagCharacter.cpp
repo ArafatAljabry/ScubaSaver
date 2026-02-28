@@ -74,10 +74,10 @@ void ABagCharacter::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, 
 	bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 
-	if (ACharacter* PlayerCharacter = Cast<ACharacter>(Other))
+	if (ATwinStickCharacter* PlayerCharacter = Cast<ATwinStickCharacter>(Other))
 	{
 		// apply damage to the character
-		//PlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
+		PlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
 	}
 
 }

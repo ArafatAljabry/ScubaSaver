@@ -21,9 +21,8 @@ APlayerCharacter::APlayerCharacter()
 
 
 	//Create capsule component for keeping the fishes in a certain area, and for future collision with the player
-	USphereComponent* SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SphereComp->InitSphereRadius(m_FishCount * m_SizeForOneFish);
-	RootComponent = SphereComp;
 
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
@@ -31,6 +30,7 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -99,8 +99,8 @@ void APlayerCharacter::BeginPlay()
 		FBoidData boid;
 		boid.Direction	  = FVector(FMath::FRandRange(0.f,1.f),0.f,0.f);
 		boid.Velocity	  = boid.Direction * (m_MaxSpeed * 0.5f); //Start at half speed
-		boid.targetOffset = FVector(FMath::FRandRange(-50.0f, 50.0f), 
-									FMath::FRandRange(-50.0f, 50.0f),
+		boid.targetOffset = FVector(FMath::FRandRange(0.0f, 30.0f), 
+									FMath::FRandRange(0.0f, 30.0f),
 									0.0f);
 		Boids.Add(boid);
 	}
@@ -111,17 +111,16 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//Move the camera as the mouse moves around
+
+	FVector Delta = FVector(m_MouseYInput, m_MouseXInput, 0.f) * m_CameraSpeed * DeltaTime;
+	AddActorWorldOffset(Delta, false);
 
 	calculateSwarmForce(DeltaTime);
 	for (int i = 0; i < m_FishCount; ++i)
 	{
 		//Move each fish forward, direction is updated in calculateSwarmForce, and speed is constant for now
 		m_FishComponents[i]->AddWorldOffset(Boids[i].Velocity * DeltaTime);
-
-	}
-	
-	
+	}	
 }
 
 // Called to bind functionality to input
@@ -212,7 +211,6 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 				FVector away = boid_a_position - boid_b_position;
 				float denom = FMath::Max(distanceFromNeighbour * distanceFromNeighbour, 1.0f);
 				separationForce += away / denom;
-
 			}
 		}
 		separationForce = separationForce.GetSafeNormal();
@@ -226,13 +224,12 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 		cohesionForce /= i.neighbourCount > 0 ? i.neighbourCount : 1; // Avoid division by zero
 		cohesionForce = (cohesionForce - boid_a_position).GetSafeNormal(); // Direction towards the center of mass of the neighbors
 
-
 		if (bHasTarget)
 		{
 			FVector desired = (seekTarget - boid_a_position); 
 			FVector desiredVelocity = desired.GetSafeNormal() * m_MaxSpeed;
 			seekForce = (desiredVelocity - i.Velocity).GetSafeNormal();
-
+			
 			if (desired.Length() < m_OrbitRadius)
 			{
 				FVector radialDirection = desired.GetSafeNormal();
@@ -257,6 +254,7 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 		FVector acc = totalForce;
 		i.Velocity += acc * seekTarget.GetSafeNormal().Length();
 		i.Velocity = i.Velocity.GetClampedToMaxSize(m_MaxSpeed);
+		
 		//Direction is normalized velocity
 		i.Direction = i.Velocity.GetSafeNormal();
 		//Rotate fish to face direction
@@ -264,9 +262,14 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 		{
 			FRotator TargetRotation = i.Direction.ToOrientationRotator();
 			FRotator CurrentRotation = m_FishComponents[a]->GetRelativeRotation();
-			FRotator SmoothedRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, dt, 20.0f);
+			FRotator SmoothedRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, dt, 100.0f);
 			m_FishComponents[a]->SetRelativeRotation(SmoothedRotation);
-			
 		} 
 	}
+}
+
+void APlayerCharacter::AdjustFishVolume()
+{
+	SphereComp->InitSphereRadius(m_FishCount * m_SizeForOneFish);
+
 }
