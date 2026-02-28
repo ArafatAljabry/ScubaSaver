@@ -63,12 +63,12 @@ void ABagCharacter::Killed()
 	);
 	if (SoundComponent)
 		SoundComponent->Play();
+
+	DestroyActor();
 }
 void ABagCharacter::DestroyActor()
 {
-	Killed();
-	
-	//Fade here
+
 	Destroy();
 }
 
@@ -105,30 +105,32 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
 
-	// award points
-	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
-	{
-		GM->ScoreUpdate(Score);
-	}
+	
 
 	// randomly spawn a pickup
 	if (FMath::RandRange(0, 100) <= FishSpawnPercentage)
 	{
 		//
-		GEngine->AddOnScreenDebugMessage(
-			-1,                      // Key (-1 = new line)
-			5.f,                     // Display time in seconds
-			FColor::Yellow,          // Text color
-			TEXT("im busting")  // Message
-		);
+		//GEngine->AddOnScreenDebugMessage(
+		//	-1,                      // Key (-1 = new line)
+		//	5.f,                     // Display time in seconds
+		//	FColor::Yellow,          // Text color
+		//	TEXT("im busting")  // Message
+		//);
 
-		ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
+
+
+		if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			GM->GotFish();
+		}
+		//ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
 	}
 
 	// spawn the NPC destruction proxy
 	//ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
 
-	DestroyActor();
+	
 
 	// defer destruction
 	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 0.1, false);

@@ -5,6 +5,7 @@
 #include "TwinStickUI.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ATwinStickGameMode::ATwinStickGameMode()
@@ -43,7 +44,13 @@ void ATwinStickGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	
+	//Player fishes =< 0 game over
+	//if (expression)
+	//{
+	//	GameOver();
+	//}
+
+
 	FindClosestSpawners();
 }
 
@@ -175,6 +182,26 @@ void ATwinStickGameMode::DecreaseNPCs()
 void ATwinStickGameMode::GotFish()
 {
 	UIWidget->GotNewFish();
+	//Create the component
+	SoundComponent = UGameplayStatics::SpawnSound2D(
+		this,
+		SoundBase,
+		1.0f,      // Volume
+		1.0f,      // Pitch
+		0.0f,      // Start time
+		nullptr,   // Concurrency
+		true,      // Persist
+		false      // Don't auto destroy
+	);
+	if (SoundComponent)
+		SoundComponent->Play();
+
+	//Player u can say here add 1 fish
 
 	UpdateFishNumber();
+}
+
+void ATwinStickGameMode::GameOver()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("GameOver"));
 }

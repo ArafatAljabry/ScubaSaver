@@ -75,6 +75,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	float range = 0;
 
+	//Sound
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* SoundBase;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAudioComponent* SoundComponent;
+
 public:
 
 	/** Gameplay initialization */
@@ -126,5 +133,7 @@ public:
 
 	//New Fish Stuff
 	void GotFish();
+
+	void GameOver();
 
 };
