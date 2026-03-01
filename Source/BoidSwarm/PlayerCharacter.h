@@ -134,4 +134,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Fish")
 	void RemoveFish(int32 Count = 1);
+
+	UFUNCTION()
+	int32 GetFishAmount() const;
+
 };

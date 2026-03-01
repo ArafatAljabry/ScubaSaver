@@ -427,3 +427,8 @@ void APlayerCharacter::RemoveFish(int32 Count)
 
 	UE_LOG(LogTemp, Log, TEXT("RemoveFish: now have %d fish."), m_FishComponents.Num());
 }
+
+int32 APlayerCharacter::GetFishAmount() const
+{
+	return m_FishComponents.Num();
+}
