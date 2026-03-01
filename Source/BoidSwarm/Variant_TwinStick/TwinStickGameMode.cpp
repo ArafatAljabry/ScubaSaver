@@ -2,6 +2,8 @@
 
 
 #include "TwinStickGameMode.h"
+
+#include "PlayerCharacter.h"
 #include "TwinStickUI.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -20,7 +22,7 @@ void ATwinStickGameMode::BeginPlay()
 	// create the UI widget and add it to the viewport
 	UIWidget = CreateWidget<UPlayerWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
-	Player =  Cast<ACharacter >(UGameplayStatics::GetPlayerCharacter(this, 0));
+	Player =  Cast<APlayerCharacter >(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 
 
@@ -36,7 +38,9 @@ void ATwinStickGameMode::BeginPlay()
 
 	}
 
-	UpdateFishNumber();
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &ATwinStickGameMode::UpdateFishNumber, 1, false);
+	
 
 }
 
@@ -45,10 +49,10 @@ void ATwinStickGameMode::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	//Player fishes =< 0 game over
-	//if (expression)
-	//{
-	//	GameOver();
-	//}
+	if (Player->GetFishAmount() <= 0)
+	{
+		GameOver();
+	}
 
 
 	FindClosestSpawners();
@@ -137,7 +141,7 @@ void ATwinStickGameMode::ResetCombo()
 void ATwinStickGameMode::UpdateFishNumber()
 {
 
-	//UIWidget->UpdateFishAmount(/*Add here the fish number*/);
+	UIWidget->UpdateFishAmount(Player->GetFishAmount());
 }
 
 void ATwinStickGameMode::FindClosestSpawners()
@@ -197,11 +201,23 @@ void ATwinStickGameMode::GotFish()
 		SoundComponent->Play();
 
 	//Player u can say here add 1 fish
+	Player->AddFish(1);
 
+	UpdateFishNumber();
+}
+
+void ATwinStickGameMode::LostFish()
+{
 	UpdateFishNumber();
 }
 
 void ATwinStickGameMode::GameOver()
 {
+	GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("Game Over!")  // Message
+	);
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("GameOver"));
 }

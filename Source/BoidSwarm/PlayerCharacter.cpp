@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
+
+#include "TwinStickGameMode.h"
 #include "Animation/AnimSingleNodeInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -415,6 +417,15 @@ void APlayerCharacter::RemoveFish(int32 Count)
 		const int32 LastIndex = m_FishComponents.Num() - 1;
 		DestroyFishAt(LastIndex);
 	}
+	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GM->LostFish();
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("RemoveFish: now have %d fish."), m_FishComponents.Num());
+}
+
+int32 APlayerCharacter::GetFishAmount() const
+{
+	return m_FishComponents.Num();
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerCharacter.h"
 #include "TwinStickCharacter.h"
 #include "TwinStickSpawner.h"
 #include "GameFramework/GameModeBase.h"
@@ -67,7 +68,7 @@ protected:
 
 
 	UPROPERTY()
-	ACharacter* Player;
+	APlayerCharacter* Player;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	TArray<ATwinStickSpawner*> Spawners;
@@ -133,6 +134,8 @@ public:
 
 	//New Fish Stuff
 	void GotFish();
+
+	void LostFish();
 
 	void GameOver();
 

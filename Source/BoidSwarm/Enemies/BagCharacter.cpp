@@ -103,12 +103,12 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 
 	// raise the hit flag
 	bHit = true;
-	GEngine->AddOnScreenDebugMessage(
-		-1,                      // Key (-1 = new line)
-		5.f,                     // Display time in seconds
-		FColor::Yellow,          // Text color
-		TEXT("outch!")  // Message
-	);
+	//GEngine->AddOnScreenDebugMessage(
+	//	-1,                      // Key (-1 = new line)
+	//	5.f,                     // Display time in seconds
+	//	FColor::Yellow,          // Text color
+	//	TEXT("outch!")  // Message
+	//);
 
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
