@@ -17,7 +17,6 @@ ABagCharacter::ABagCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	
 
 }
 
@@ -79,7 +78,7 @@ void ABagCharacter::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, 
 	if (ACharacter* PlayerCharacter = Cast<ACharacter>(Other))
 	{
 		// apply damage to the character
-		//PlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
+		//hPlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
 	}
 
 }

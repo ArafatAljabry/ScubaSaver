@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
-
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -85,6 +85,12 @@ void APlayerCharacter::BeginPlay()
 			Fish->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 			Fish->SetAnimation(m_SwimAnimation);
 			Fish->Play(true); // Loop animation
+
+			if (UAnimSingleNodeInstance* SI = Fish->GetSingleNodeInstance())
+			{
+				SI->SetPlayRate(FMath::FRandRange(0.1f, 0.4f)); // slow, varied
+			}
+			// Randomize play rate for variety
 		}
 
 		// Random initial location
@@ -227,6 +233,7 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 		if (bHasTarget)
 		{
 			FVector desired = (seekTarget - boid_a_position); 
+			desired.Z += 200; // Keep movement in the XY plane
 			FVector desiredVelocity = desired.GetSafeNormal() * m_MaxSpeed;
 			seekForce = (desiredVelocity - i.Velocity).GetSafeNormal();
 			
@@ -246,7 +253,7 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 							separationForce * m_SeparationWeight + // acc = w*separation + w*alignment + w*cohesion
 							alignmentForce	* m_AlignmentWeight	 +
 							cohesionForce	* m_CohesionWeight   +
-							seekForce		* m_SeekWeight ;
+							seekForce		* m_SeekWeight;
 
 		/*
 		 *  After all the forces are computed, we apply them to the velocity and position of the boid.

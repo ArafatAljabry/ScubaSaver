@@ -56,7 +56,7 @@ void ATwinStickGameMode::EndPlay(EEndPlayReason::Type EndPlayReason)
 }
 
 void ATwinStickGameMode::ItemUsed(int32 Value)
-{
+{ 
 	// update the UI
 	//UIWidget->UpdateItems(Value);
 }
