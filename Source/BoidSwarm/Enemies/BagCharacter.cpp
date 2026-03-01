@@ -4,6 +4,7 @@
 #include "Enemies/BagCharacter.h"
 
 #include "EnemyAIController.h"
+#include "PlayerCharacter.h"
 #include "TwinStickGameMode.h"
 #include "TwinStickNPCDestruction.h"
 #include "TwinStickPickup.h"
@@ -17,7 +18,6 @@ ABagCharacter::ABagCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	
 
 }
 
@@ -63,10 +63,12 @@ void ABagCharacter::Killed()
 	);
 	if (SoundComponent)
 		SoundComponent->Play();
+
+	DestroyActor();
 }
 void ABagCharacter::DestroyActor()
 {
-	Killed();
+
 	Destroy();
 }
 
@@ -74,10 +76,18 @@ void ABagCharacter::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, 
 	bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 
-	if (ATwinStickCharacter* PlayerCharacter = Cast<ATwinStickCharacter>(Other))
+	if (ACharacter* PlayerCharacter = Cast<ACharacter>(Other))
 	{
 		// apply damage to the character
-		PlayerCharacter->HandleDamage(1.0f, GetActorForwardVector());
+		if (TObjectPtr<APlayerCharacter> FishCharacter = Cast<APlayerCharacter>(Other))
+		{
+
+			UE_LOG(LogTemp, Warning, TEXT("[Bag] NotifyHit fired: Other=%s, MyComp=%s, OtherComp=%s"),
+				*GetNameSafe(Other), *GetNameSafe(MyComp), *GetNameSafe(OtherComp));
+
+			FishCharacter->RemoveFish();
+		}
+
 	}
 
 }
@@ -93,40 +103,42 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 
 	// raise the hit flag
 	bHit = true;
-	GEngine->AddOnScreenDebugMessage(
-		-1,                      // Key (-1 = new line)
-		5.f,                     // Display time in seconds
-		FColor::Yellow,          // Text color
-		TEXT("outch!")  // Message
-	);
+	//GEngine->AddOnScreenDebugMessage(
+	//	-1,                      // Key (-1 = new line)
+	//	5.f,                     // Display time in seconds
+	//	FColor::Yellow,          // Text color
+	//	TEXT("outch!")  // Message
+	//);
 
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
 
-	// award points
-	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
-	{
-		GM->ScoreUpdate(Score);
-	}
+	
 
 	// randomly spawn a pickup
 	if (FMath::RandRange(0, 100) <= FishSpawnPercentage)
 	{
 		//
-		GEngine->AddOnScreenDebugMessage(
-			-1,                      // Key (-1 = new line)
-			5.f,                     // Display time in seconds
-			FColor::Yellow,          // Text color
-			TEXT("im busting")  // Message
-		);
+		//GEngine->AddOnScreenDebugMessage(
+		//	-1,                      // Key (-1 = new line)
+		//	5.f,                     // Display time in seconds
+		//	FColor::Yellow,          // Text color
+		//	TEXT("im busting")  // Message
+		//);
 
-		ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
+
+
+		if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			GM->GotFish();
+		}
+		//ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
 	}
 
 	// spawn the NPC destruction proxy
-	ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
+	//ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
 
-	DestroyActor();
+	
 
 	// defer destruction
 	GetWorld()->GetTimerManager().SetTimer(DestructionTimer, this, &ABagCharacter::Killed, 0.1, false);

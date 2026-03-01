@@ -2,9 +2,12 @@
 
 
 #include "TwinStickGameMode.h"
+
+#include "PlayerCharacter.h"
 #include "TwinStickUI.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ATwinStickGameMode::ATwinStickGameMode()
@@ -17,9 +20,11 @@ void ATwinStickGameMode::BeginPlay()
 	
 
 	// create the UI widget and add it to the viewport
-	UIWidget = CreateWidget<UTwinStickUI>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
+	UIWidget = CreateWidget<UPlayerWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
-	Player = Cast<ATwinStickCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	Player =  Cast<APlayerCharacter >(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+
 
 	TArray<AActor*> actors;
 	UGameplayStatics::GetAllActorsOfClass(this, ATwinStickSpawner::StaticClass(), actors);
@@ -32,13 +37,24 @@ void ATwinStickGameMode::BeginPlay()
 		}
 
 	}
+
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &ATwinStickGameMode::UpdateFishNumber, 1, false);
+	
+
 }
 
 void ATwinStickGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	
+	//Player fishes =< 0 game over
+	if (Player->GetFishAmount() <= 0)
+	{
+		GameOver();
+	}
+
+
 	FindClosestSpawners();
 }
 
@@ -51,75 +67,81 @@ void ATwinStickGameMode::EndPlay(EEndPlayReason::Type EndPlayReason)
 }
 
 void ATwinStickGameMode::ItemUsed(int32 Value)
-{
+{ 
 	// update the UI
-	UIWidget->UpdateItems(Value);
+	//UIWidget->UpdateItems(Value);
 }
 
 void ATwinStickGameMode::ScoreUpdate(int32 Value)
 {
-	// multiply the base score by the combo multiplier and add it to the score
-	Score += Value * Combo;
+	//// multiply the base score by the combo multiplier and add it to the score
+	//Score += Value * Combo;
 
-	// update the UI
-	UIWidget->UpdateScore(Score);
+	//// update the UI
+	//UIWidget->UpdateScore(Score);
 
-	// update the combo multiplier
-	ComboUpdate();
+	//// update the combo multiplier
+	//ComboUpdate();
 }
 
 void ATwinStickGameMode::ComboUpdate()
 {
-	// return
-	if (Combo > ComboCap)
-	{
-		return;
-	}
+	//// return
+	//if (Combo > ComboCap)
+	//{
+	//	return;
+	//}
 
-	// update the combo increment
-	++ComboIncrement;
+	//// update the combo increment
+	//++ComboIncrement;
 
-	// is it time to increase the multiplier?
-	if (ComboIncrement > ComboIncrementMax)
-	{
-		// reset the combo increment
-		ComboIncrement = 0;
+	//// is it time to increase the multiplier?
+	//if (ComboIncrement > ComboIncrementMax)
+	//{
+	//	// reset the combo increment
+	//	ComboIncrement = 0;
 
-		// increase the combo multiplier
-		++Combo;
+	//	// increase the combo multiplier
+	//	++Combo;
 
-		// update the UI
-		UIWidget->UpdateCombo(Combo);
+	//	// update the UI
+	//	UIWidget->UpdateCombo(Combo);
 
-	}
+	//}
 
-	// reset the cooldown timer
-	ResetComboCooldown();
+	//// reset the cooldown timer
+	//ResetComboCooldown();
 }
 
 void ATwinStickGameMode::ResetComboCooldown()
 {
 	// reset the combo cooldown timer
-	GetWorld()->GetTimerManager().SetTimer(ComboTimer, this, &ATwinStickGameMode::ResetCombo, ComboCooldown, false);
+	//GetWorld()->GetTimerManager().SetTimer(ComboTimer, this, &ATwinStickGameMode::ResetCombo, ComboCooldown, false);
 }
 
 void ATwinStickGameMode::ResetCombo()
 {
-	// is the combo multiplier above min?
-	if (Combo > 1)
-	{
-		// reset the combo increment
-		ComboIncrement = 0;
+	//// is the combo multiplier above min?
+	//if (Combo > 1)
+	//{
+	//	// reset the combo increment
+	//	ComboIncrement = 0;
 
-		// tick down the multiplier
-		--Combo;
+	//	// tick down the multiplier
+	//	--Combo;
 
-		// update the UI
-		UIWidget->UpdateCombo(Combo);
+	//	// update the UI
+	//	UIWidget->UpdateCombo(Combo);
 
-		// reset the cooldown timer
-		ResetComboCooldown();
-	}
+	//	// reset the cooldown timer
+	//	ResetComboCooldown();
+	//}
+}
+
+void ATwinStickGameMode::UpdateFishNumber()
+{
+
+	UIWidget->UpdateFishAmount(Player->GetFishAmount());
 }
 
 void ATwinStickGameMode::FindClosestSpawners()
@@ -159,4 +181,43 @@ void ATwinStickGameMode::DecreaseNPCs()
 {
 	// decrease the NPC counter
 	--NPCCount;
+}
+
+void ATwinStickGameMode::GotFish()
+{
+	UIWidget->GotNewFish();
+	//Create the component
+	SoundComponent = UGameplayStatics::SpawnSound2D(
+		this,
+		SoundBase,
+		1.0f,      // Volume
+		1.0f,      // Pitch
+		0.0f,      // Start time
+		nullptr,   // Concurrency
+		true,      // Persist
+		false      // Don't auto destroy
+	);
+	if (SoundComponent)
+		SoundComponent->Play();
+
+	//Player u can say here add 1 fish
+	Player->AddFish(1);
+
+	UpdateFishNumber();
+}
+
+void ATwinStickGameMode::LostFish()
+{
+	UpdateFishNumber();
+}
+
+void ATwinStickGameMode::GameOver()
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("Game Over!")  // Message
+	);
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("GameOver"));
 }
