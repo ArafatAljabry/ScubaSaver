@@ -124,8 +124,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 		m_FishComponents[i]->AddWorldOffset(Boids[i].Velocity * DeltaTime);
 	}
 	
-	AddMovementInput(FVector::ForwardVector, m_MouseXInput * m_CameraSpeed);
-	AddMovementInput(FVector::RightVector, m_MouseYInput * m_CameraSpeed);
+	//here fix this
+	FVector target;
+	if (GetCursorWorldTarget(target))
+	{
+		FVector direction = target - GetActorLocation();
+		
+
+		direction.Normalize();
+		AddMovementInput(direction, 1.0);
+	}
 		
 }
 
@@ -143,11 +151,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::OnMouseX(float value)
 {
 	m_MouseXInput = value;
+	AddMovementInput(GetActorForwardVector(), m_MouseXInput);
+	
 }
 
 void APlayerCharacter::OnMouseY(float value)
 {
 	m_MouseYInput = value;
+	AddMovementInput(GetActorRightVector(), m_MouseYInput);
 }
 
 bool APlayerCharacter::GetCursorWorldTarget(FVector& OutTarget) const
