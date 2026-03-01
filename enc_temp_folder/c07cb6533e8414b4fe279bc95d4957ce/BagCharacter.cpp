@@ -81,10 +81,6 @@ void ABagCharacter::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, 
 		// apply damage to the character
 		if (TObjectPtr<APlayerCharacter> FishCharacter = Cast<APlayerCharacter>(Other))
 		{
-
-			UE_LOG(LogTemp, Warning, TEXT("[Bag] NotifyHit fired: Other=%s, MyComp=%s, OtherComp=%s"),
-				*GetNameSafe(Other), *GetNameSafe(MyComp), *GetNameSafe(OtherComp));
-
 			FishCharacter->RemoveFish();
 		}
 

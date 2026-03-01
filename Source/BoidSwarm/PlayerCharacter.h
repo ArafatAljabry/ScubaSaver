@@ -84,6 +84,15 @@ private:
 
 	/*Calculate swarm forces*/
 	void calculateSwarmForce(float ); //deltatime
+
+	// Creates one fish component + boid and appends to arrays. Returns the new index or INDEX_NONE on failure.
+	int32 CreateOneFish();
+
+	// Destroys the fish at index by swap-removing from arrays (O(1)).
+	void DestroyFishAt(int32 Index);
+
+	// Recalculate and apply the sphere radius after changes.
+	void UpdateFishVolume();
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
@@ -119,4 +128,10 @@ public:
 	FORCEINLINE TObjectPtr<class USpringArmComponent> GetCameraBoom() const { return m_CameraBoom; }
 
 	void AdjustFishVolume();
+
+	UFUNCTION(BlueprintCallable, Category = "Fish")
+	void AddFish(int32 Count = 1);
+
+	UFUNCTION(BlueprintCallable, Category = "Fish")
+	void RemoveFish(int32 Count = 1);
 };

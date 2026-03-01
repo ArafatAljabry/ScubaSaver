@@ -84,13 +84,13 @@ void APlayerCharacter::BeginPlay()
 		{
 			Fish->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 			Fish->SetAnimation(m_SwimAnimation);
-			Fish->Play(true); // Loop animation
 
 			if (UAnimSingleNodeInstance* SI = Fish->GetSingleNodeInstance())
 			{
+				Fish->Play(true); // Loop animation
 				SI->SetPlayRate(FMath::FRandRange(0.1f, 0.4f)); // slow, varied
 			}
-			// Randomize play rate for variety
+			
 		}
 
 		// Random initial location
@@ -259,7 +259,7 @@ void APlayerCharacter::calculateSwarmForce( float dt)
 		 *  After all the forces are computed, we apply them to the velocity and position of the boid.
 		 */
 		FVector acc = totalForce;
-		i.Velocity += acc * seekTarget.GetSafeNormal().Length();
+		i.Velocity += acc;
 		i.Velocity = i.Velocity.GetClampedToMaxSize(m_MaxSpeed);
 		
 		//Direction is normalized velocity
@@ -279,4 +279,151 @@ void APlayerCharacter::AdjustFishVolume()
 {
 	SphereComp->InitSphereRadius(m_FishCount * m_SizeForOneFish);
 
+}
+
+
+
+
+
+
+
+
+
+int32 APlayerCharacter::CreateOneFish()
+{
+	if (!m_FishMesh) // Require a mesh to create a fish
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CreateOneFish: No m_FishMesh set."));
+		return INDEX_NONE;
+	}
+
+	const int32 Index = m_FishComponents.Num();
+
+	// Unique component name
+	USkeletalMeshComponent* Fish = NewObject<USkeletalMeshComponent>(
+		this,
+		*FString::Printf(TEXT("Fish_%d"), Index)
+	);
+
+	if (!Fish)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CreateOneFish: Failed to allocate skeletal mesh component."));
+		return INDEX_NONE;
+	}
+
+	// Basic setup
+	Fish->SetMobility(EComponentMobility::Movable);
+	Fish->SetupAttachment(GetRootComponent());
+	Fish->SetRelativeScale3D(FVector(0.1f));
+	Fish->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Fish->SetCastShadow(false);
+	Fish->bReceivesDecals = false;
+
+	Fish->SetSkeletalMesh(m_FishMesh);
+
+	// Register before accessing AnimSingleNodeInstance
+	Fish->RegisterComponent();
+	Fish->SetVisibility(true);
+
+	// Animation (single-node)
+	if (m_SwimAnimation)
+	{
+		Fish->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		Fish->SetAnimation(m_SwimAnimation);
+
+		if (UAnimSingleNodeInstance* SI = Fish->GetSingleNodeInstance())
+		{
+			SI->SetPlaying(true);
+			SI->SetPlayRate(FMath::FRandRange(0.6f, 1.2f));
+		}
+	}
+
+	// Initial world placement near actor
+	const FVector RandOffset(
+		FMath::FRandRange(-300.f, 300.f),
+		FMath::FRandRange(-300.f, 300.f),
+		FMath::FRandRange(-100.f, 100.f)
+	);
+	Fish->SetWorldLocation(GetActorLocation() + RandOffset);
+
+	// Push into arrays
+	m_FishComponents.Add(Fish);
+
+	FBoidData NewBoid{};
+	NewBoid.Direction = FVector(FMath::FRandRange(0.f, 1.f), 0.f, 0.f).GetSafeNormal();
+	NewBoid.Velocity = NewBoid.Direction * (m_MaxSpeed * 0.5f);
+	NewBoid.targetOffset = FVector(FMath::FRandRange(0.0f, 30.0f),
+		FMath::FRandRange(0.0f, 30.0f),
+		0.0f);
+	Boids.Add(NewBoid);
+
+	// Keep count in sync, and update sphere
+	m_FishCount = m_FishComponents.Num();
+	UpdateFishVolume();
+
+	return Index;
+}
+
+void APlayerCharacter::DestroyFishAt(int32 Index)
+{
+	if (!m_FishComponents.IsValidIndex(Index) || !Boids.IsValidIndex(Index))
+	{
+		return;
+	}
+
+	// Destroy the component
+	if (USkeletalMeshComponent* Fish = m_FishComponents[Index])
+	{
+		Fish->DestroyComponent();
+	}
+
+	// Swap-remove from arrays (O(1)) to keep them in sync and compact
+	m_FishComponents.RemoveAtSwap(Index);
+	Boids.RemoveAtSwap(Index);
+
+	// If we swapped in the last element, its component name/Anim is still valid.
+	// No need to rename, indices are internal.
+
+	// Keep count in sync, and update sphere
+	m_FishCount = m_FishComponents.Num();
+	UpdateFishVolume();
+}
+
+void APlayerCharacter::UpdateFishVolume()
+{
+	// Keep your existing logic, or call AdjustFishVolume()
+	if (SphereComp)
+	{
+		SphereComp->InitSphereRadius(m_FishCount * m_SizeForOneFish);
+	}
+	// Or:
+	// AdjustFishVolume();
+}
+
+void APlayerCharacter::AddFish(int32 Count /*=1*/)
+{
+	Count = FMath::Max(0, Count);
+	for (int32 i = 0; i < Count; ++i)
+	{
+		CreateOneFish();
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("AddFish: now have %d fish."), m_FishComponents.Num());
+}
+
+void APlayerCharacter::RemoveFish(int32 Count)
+{
+	Count = FMath::Max(0, Count);
+
+	// Remove up to Count, clamped to current size
+	const int32 ToRemove = FMath::Min(Count, m_FishComponents.Num());
+
+	for (int32 i = 0; i < ToRemove; ++i)
+	{
+		// Remove last element for O(1) (or choose a random index)
+		const int32 LastIndex = m_FishComponents.Num() - 1;
+		DestroyFishAt(LastIndex);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("RemoveFish: now have %d fish."), m_FishComponents.Num());
 }
