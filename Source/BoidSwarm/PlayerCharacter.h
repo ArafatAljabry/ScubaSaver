@@ -49,7 +49,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Flocking")
 	TObjectPtr<USkeletalMesh> m_FishMesh;
-
+	
+	UPROPERTY(EditAnywhere, Category = "Flocking")
+	TObjectPtr<UMaterialInterface> m_Material;
+	
 	UPROPERTY(EditAnywhere, Category = "Flocking")
 	TObjectPtr<UAnimationAsset> m_SwimAnimation{};
 	
@@ -118,6 +121,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
 	float m_MaxSteerForce{ 200.0f };
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking")
 	float m_CameraSpeed{ 500.0f };

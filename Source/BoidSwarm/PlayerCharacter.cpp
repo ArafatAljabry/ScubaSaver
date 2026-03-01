@@ -20,10 +20,6 @@ APlayerCharacter::APlayerCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 
-	//Create capsule component for keeping the fishes in a certain area, and for future collision with the player
-	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-	SphereComp->InitSphereRadius(m_FishCount * m_SizeForOneFish);
-
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -71,6 +67,7 @@ void APlayerCharacter::BeginPlay()
 		if (m_FishMesh)
 		{
 			Fish->SetSkeletalMesh(m_FishMesh);
+			Fish->SetMaterial(0, m_Material);
 			Fish->SetupAttachment(GetRootComponent());
 			Fish->SetMobility(EComponentMobility::Movable);
 			Fish->SetRelativeScale3D(FVector(0.1f)); //Scale the fish, they be too big
@@ -118,15 +115,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector Delta = FVector(m_MouseYInput, m_MouseXInput, 0.f) * m_CameraSpeed * DeltaTime;
-	AddActorWorldOffset(Delta, false);
-
 	calculateSwarmForce(DeltaTime);
 	for (int i = 0; i < m_FishCount; ++i)
 	{
 		//Move each fish forward, direction is updated in calculateSwarmForce, and speed is constant for now
 		m_FishComponents[i]->AddWorldOffset(Boids[i].Velocity * DeltaTime);
-	}	
+	}
+	
+	AddMovementInput(FVector::ForwardVector, m_MouseXInput * m_CameraSpeed);
+	AddMovementInput(FVector::RightVector, m_MouseYInput * m_CameraSpeed);
+		
 }
 
 // Called to bind functionality to input
@@ -282,13 +280,6 @@ void APlayerCharacter::AdjustFishVolume()
 }
 
 
-
-
-
-
-
-
-
 int32 APlayerCharacter::CreateOneFish()
 {
 	if (!m_FishMesh) // Require a mesh to create a fish
@@ -394,7 +385,7 @@ void APlayerCharacter::UpdateFishVolume()
 	// Keep your existing logic, or call AdjustFishVolume()
 	if (SphereComp)
 	{
-		SphereComp->InitSphereRadius(m_FishCount * m_SizeForOneFish);
+		GetCapsuleComponent()->SetCapsuleRadius(m_FishCount * m_SizeForOneFish);
 	}
 	// Or:
 	// AdjustFishVolume();
