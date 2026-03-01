@@ -135,6 +135,8 @@ public:
 	//New Fish Stuff
 	void GotFish();
 
+	void LostFish();
+
 	void GameOver();
 
 };

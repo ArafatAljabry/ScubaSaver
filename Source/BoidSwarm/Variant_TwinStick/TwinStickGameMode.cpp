@@ -206,6 +206,11 @@ void ATwinStickGameMode::GotFish()
 	UpdateFishNumber();
 }
 
+void ATwinStickGameMode::LostFish()
+{
+	UpdateFishNumber();
+}
+
 void ATwinStickGameMode::GameOver()
 {
 	GEngine->AddOnScreenDebugMessage(
