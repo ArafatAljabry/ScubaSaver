@@ -100,12 +100,7 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	}
 
 	const int32 AvailableSlots = maxFishNumber - Boids.Num();
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		2.0f,
-		FColor::Yellow,
-		FString::Printf(TEXT("Available: %d"), AvailableSlots)
-	);
+	
 	if (AvailableSlots <= 0)
 	{
 		return; // already at cap
@@ -161,10 +156,11 @@ void ATwinStickCharacter::DeleteBoidFromArray(ABoid* Boid)
 	{
 		return;
 	}
-
+	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GM->LostFish();
+	}
 	Boids.RemoveSingleSwap(Boid);
-
-	
 
 }
 
@@ -244,23 +240,7 @@ void ATwinStickCharacter::BeginPlay()
 	//
 
 	//Background audio
-	if (BackgroundMusic)
-	{
-		//Create the component
-		MusicComponent = UGameplayStatics::SpawnSound2D(
-														this,
-														BackgroundMusic,
-														1.0f,      // Volume
-														1.0f,      // Pitch
-														0.0f,      // Start time
-														nullptr,   // Concurrency
-														true,      // Persist
-														false      // Don't auto destroy
-														);
-		if (MusicComponent)
-			MusicComponent->Play();
-	}
-
+	
 }
 
 void ATwinStickCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -356,13 +336,6 @@ void ATwinStickCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		2.0f,
-		FColor::Yellow,
-		FString::Printf(TEXT("Doids size: %d"), Boids.Num())
-	);
 	// get the current rotation
 	const FRotator OldRotation = GetActorRotation();
 

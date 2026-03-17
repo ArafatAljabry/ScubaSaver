@@ -22,7 +22,7 @@ void ATwinStickGameMode::BeginPlay()
 	// create the UI widget and add it to the viewport
 	UIWidget = CreateWidget<UPlayerWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
-	Player =  Cast<APlayerCharacter >(UGameplayStatics::GetPlayerCharacter(this, 0));
+	Player =  Cast<ATwinStickCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
 
 
@@ -49,11 +49,19 @@ void ATwinStickGameMode::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	//Player fishes =< 0 game over
-	if (Player->GetFishAmount() <= 0)
+	/*if(Player)
 	{
-		GameOver();
+		if (Player->gotfish( <= 0)
+		{
+			GameOver();
+		}
+		
+	}*/
+	if (Player)
+	{
+		if (Player->Boids.Num() <= 0)
+			GameOver();
 	}
-
 
 	FindClosestSpawners();
 }
@@ -140,8 +148,10 @@ void ATwinStickGameMode::ResetCombo()
 
 void ATwinStickGameMode::UpdateFishNumber()
 {
-
-	UIWidget->UpdateFishAmount(Player->GetFishAmount());
+	if (Player)
+		if (Player->Boids.Num() >= 30 || Player->Boids.Num() <= 0)
+			return;
+	UIWidget->UpdateFishAmount(Player->Boids.Num());
 }
 
 void ATwinStickGameMode::FindClosestSpawners()
@@ -201,7 +211,8 @@ void ATwinStickGameMode::GotFish()
 		SoundComponent->Play();
 
 	//Player u can say here add 1 fish
-	Player->AddFish(1);
+	//Player->AddFish(1);
+
 
 	UpdateFishNumber();
 }

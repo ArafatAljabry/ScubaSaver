@@ -122,6 +122,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{
 		//Move each fish forward, direction is updated in calculateSwarmForce, and speed is constant for now
 		m_FishComponents[i]->AddWorldOffset(Boids[i].Velocity * DeltaTime);
+		
+	
 	}
 	
 	//here fix this
@@ -132,7 +134,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		
 
 		direction.Normalize();
-		AddMovementInput(direction, 1.0);
+		AddMovementInput(direction, .2f);
 	}
 		
 }
@@ -355,7 +357,7 @@ int32 APlayerCharacter::CreateOneFish()
 
 	FBoidData NewBoid{};
 	NewBoid.Direction = FVector(FMath::FRandRange(0.f, 1.f), 0.f, 0.f).GetSafeNormal();
-	NewBoid.Velocity = NewBoid.Direction * (m_MaxSpeed * 0.5f);
+	NewBoid.Velocity  = NewBoid.Direction * (m_MaxSpeed * 0.5f);
 	NewBoid.targetOffset = FVector(FMath::FRandRange(0.0f, 30.0f),
 		FMath::FRandRange(0.0f, 30.0f),
 		0.0f);
