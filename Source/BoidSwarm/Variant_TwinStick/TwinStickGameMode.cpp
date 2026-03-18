@@ -49,18 +49,12 @@ void ATwinStickGameMode::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	//Player fishes =< 0 game over
-	/*if(Player)
-	{
-		if (Player->gotfish( <= 0)
-		{
-			GameOver();
-		}
-		
-	}*/
 	if (Player)
 	{
 		if (Player->Boids.Num() <= 0)
+		{
 			GameOver();
+		}
 	}
 
 	FindClosestSpawners();
@@ -148,9 +142,6 @@ void ATwinStickGameMode::ResetCombo()
 
 void ATwinStickGameMode::UpdateFishNumber()
 {
-	if (Player)
-		if (Player->Boids.Num() >= 30 || Player->Boids.Num() <= 0)
-			return;
 	UIWidget->UpdateFishAmount(Player->Boids.Num());
 }
 

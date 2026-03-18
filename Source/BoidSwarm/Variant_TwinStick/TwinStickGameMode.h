@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlayerCharacter.h"
 #include "TwinStickCharacter.h"
 #include "TwinStickSpawner.h"
 #include "GameFramework/GameModeBase.h"

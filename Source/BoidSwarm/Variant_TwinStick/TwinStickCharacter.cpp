@@ -150,6 +150,11 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 	UE_LOG(LogTemp, Warning, TEXT("Spawned %d boids. Total: %d"), Count, Boids.Num());
 }
 
+void ATwinStickCharacter::AddFish(int value)
+{
+	SpawnBoids(value);
+}
+
 void ATwinStickCharacter::DeleteBoidFromArray(ABoid* Boid)
 {
 	if (!Boid)

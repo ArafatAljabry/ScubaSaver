@@ -282,7 +282,9 @@ public:
 		UPROPERTY(EditAnywhere, Category = "Boids"/*, meta = (ClampMin = "1") */ )
 		int BoidsToSpawnPerClick = 25;
 
-
+		UFUNCTION()
+		void AddFish(int value);
+		
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boids")
 		FVector SwarmCenter = FVector::ZeroVector;
 
