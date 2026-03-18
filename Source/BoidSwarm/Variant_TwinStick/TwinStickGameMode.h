@@ -65,8 +65,6 @@ protected:
 	/** Current number of NPCs in the level */
 	int32 NPCCount = 0;
 
-
-
 	UPROPERTY()
 	APlayerCharacter* Player;
 

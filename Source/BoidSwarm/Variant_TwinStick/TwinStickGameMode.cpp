@@ -17,14 +17,10 @@ ATwinStickGameMode::ATwinStickGameMode()
 
 void ATwinStickGameMode::BeginPlay()
 {
-	
-
 	// create the UI widget and add it to the viewport
 	UIWidget = CreateWidget<UPlayerWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
 	Player =  Cast<APlayerCharacter >(UGameplayStatics::GetPlayerCharacter(this, 0));
-
-
 
 	TArray<AActor*> actors;
 	UGameplayStatics::GetAllActorsOfClass(this, ATwinStickSpawner::StaticClass(), actors);
@@ -35,13 +31,9 @@ void ATwinStickGameMode::BeginPlay()
 		{
 			Spawners.Add(Spawner);
 		}
-
 	}
-
 	FTimerHandle timer;
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &ATwinStickGameMode::UpdateFishNumber, 1, false);
-	
-
 }
 
 void ATwinStickGameMode::Tick(float DeltaSeconds)
@@ -53,8 +45,6 @@ void ATwinStickGameMode::Tick(float DeltaSeconds)
 	{
 		GameOver();
 	}
-
-
 	FindClosestSpawners();
 }
 

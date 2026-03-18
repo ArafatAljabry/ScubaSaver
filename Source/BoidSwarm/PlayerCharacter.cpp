@@ -11,7 +11,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimationAsset.h"
-	
+#include "Kismet/GameplayStatics.h"
 
 #include "Components/SphereComponent.h"
 
@@ -20,7 +20,6 @@ APlayerCharacter::APlayerCharacter()
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-
 
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
@@ -123,17 +122,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		//Move each fish forward, direction is updated in calculateSwarmForce, and speed is constant for now
 		m_FishComponents[i]->AddWorldOffset(Boids[i].Velocity * DeltaTime);
 	}
-	
-	//here fix this
-	FVector target;
-	if (GetCursorWorldTarget(target))
-	{
-		FVector direction = target - GetActorLocation();
-		
-
-		direction.Normalize();
-		AddMovementInput(direction, 1.0);
-	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Debug Message Example"));
 		
 }
 
