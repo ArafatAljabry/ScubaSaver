@@ -27,12 +27,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behavior Tree")
 	UBehaviorTree* BagBT;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Behavior Tree")
+	UBehaviorTree* ShooterBT;
+
 	UPROPERTY()
 	UBlackboardComponent* BagBbComp;
 
+	UPROPERTY()
+	UBlackboardComponent* ShooterBbComp;
 	
-
-
+	UPROPERTY()
+	ACharacter* PlayerReg;
 
 	
 };
