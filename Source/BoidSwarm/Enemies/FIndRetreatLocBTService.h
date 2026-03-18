@@ -3,23 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
 #include "EnemyAIController.h"
-#include "MoveBTTaskNode.generated.h"
+#include "BehaviorTree/BTService.h"
+#include "FIndRetreatLocBTService.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BOIDSWARM_API UMoveBTTaskNode : public UBTTaskNode
+class BOIDSWARM_API UFIndRetreatLocBTService : public UBTService
 {
 	GENERATED_BODY()
 
-	UMoveBTTaskNode();
 
-public:
-	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
+	
 protected:
 
 	UPROPERTY()
@@ -28,5 +27,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Key")
 	FBlackboardKeySelector RetreatLocKey;
 
-	
+
 };

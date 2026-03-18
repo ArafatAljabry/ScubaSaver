@@ -3,6 +3,7 @@
 
 #include "Enemies/Shootercharacter.h"
 
+#include "MyActorProjectile.h"
 #include "TwinStickGameMode.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,7 +22,10 @@ void AShootercharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	if (!Player)
+	{
+		Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	}
 
 }
 
@@ -33,12 +37,6 @@ void AShootercharacter::Tick(float DeltaTime)
 	if (!Player)
 	{
 		Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-
-	}
-	
-	if (bCanShoot)
-	{
-		Shoot();
 	}
 
 }
@@ -112,16 +110,38 @@ void AShootercharacter::ProjectileImpact(const FVector& ForwardVector)
 
 void AShootercharacter::Shoot()
 {
-	FVector Start = ShootLoc->GetComponentLocation()+ GetActorForwardVector();
+	if (!bCanShoot)
+	{
+		return;
+	}
+
+	bCanShoot = false;
+
+	FireProjectile();
+
+	FTimerHandle timer;
+	GetWorld()->GetTimerManager().SetTimer(timer, this, &AShootercharacter::ResetFire, FireRate, false);
+
+}
+
+void AShootercharacter::ResetFire()
+{
+	bCanShoot = true;
+}
+
+void AShootercharacter::FireProjectile()
+{
+
+	FVector Start = ShootLoc->GetComponentLocation() + GetActorForwardVector();
 	FVector Target = Player->GetActorLocation();
 
 	FVector Direction = (Target - Start).GetSafeNormal();
 
 	FActorSpawnParameters Params;
-	
-	//AActor* bullet = GetWorld()->SpawnActor<AActor>(class, Start, FRotator::ZeroRotator, Params);
 
-	//send direction
+	AMyActorProjectile* bullet = GetWorld()->SpawnActor<AMyActorProjectile>(AMyActorProjectile::StaticClass(), Start, FRotator::ZeroRotator, Params);
+
+	
 }
 
 

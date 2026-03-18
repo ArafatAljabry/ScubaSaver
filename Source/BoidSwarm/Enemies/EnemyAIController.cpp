@@ -3,6 +3,8 @@
 
 #include "Enemies/EnemyAIController.h"
 
+#include "BagCharacter.h"
+#include "Shootercharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
@@ -30,9 +32,24 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 
 	if (!BagBT)
 	{return;}
-	UseBlackboard(BagBT->GetBlackboardAsset(), BagBbComp);
-	BagBbComp->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
-	RunBehaviorTree(BagBT);
+
+	if (!ShooterBT)
+	{
+		return;
+	}
+	if (InPawn->IsA(ABagCharacter::StaticClass()))
+	{
+		UseBlackboard(BagBT->GetBlackboardAsset(), BagBbComp);
+		BagBbComp->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
+		RunBehaviorTree(BagBT);
+	}
+	else if (InPawn->IsA(AShootercharacter::StaticClass()))
+	{
+		UseBlackboard(ShooterBT->GetBlackboardAsset(), BagBbComp);
+		BagBbComp->SetValueAsObject("Player", UGameplayStatics::GetPlayerCharacter(this, 0));
+		RunBehaviorTree(ShooterBT);
+	}
+
 	
 	
 

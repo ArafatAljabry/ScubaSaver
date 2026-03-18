@@ -33,16 +33,16 @@ protected:
 	float speed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "variables")
-	float damage;
+	float FireRate = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* ShootLoc;
 	UPROPERTY(EditAnywhere, Category = "Pickup")
 	float FishSpawnPercentage = 0;
-
-	ACharacter*  Player = nullptr;
+	ACharacter* Player = nullptr;
 
 public:
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* SoundBase;
@@ -64,5 +64,11 @@ public:
 
 	UFUNCTION()
 	void Shoot();
+
+	UFUNCTION()
+	void ResetFire();
+
+	UFUNCTION()
+	void FireProjectile();
 
 };
