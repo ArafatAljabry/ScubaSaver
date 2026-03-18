@@ -33,9 +33,11 @@ protected:
 	UPROPERTY()
 	UBlackboardComponent* BagBbComp;
 
+	UPROPERTY()
+	UBlackboardComponent* ShooterBbComp;
 	
-
-
+	UPROPERTY()
+	ACharacter* PlayerReg;
 
 	
 };

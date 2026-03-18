@@ -3,17 +3,27 @@
 
 #include "Enemies/MyActorProjectile.h"
 
+#include "PlayerCharacter.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+
 // Sets default values
 AMyActorProjectile::AMyActorProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	collider = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));
+	RootComponent =collider;
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MEsh"));
-	RootComponent = mesh;
+	mesh->SetupAttachment(RootComponent);;
 
-	collider = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));
-	collider->SetupAttachment(RootComponent);
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
+	ProjectileMovement->UpdatedComponent = collider;
+	ProjectileMovement->InitialSpeed = 0.0f;
+	ProjectileMovement->MaxSpeed = 0.0f;
+	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bShouldBounce = false;
 
 }
 
@@ -25,6 +35,8 @@ void AMyActorProjectile::BeginPlay()
 	FTimerHandle Timer;
 
 	GetWorld()->GetTimerManager().SetTimer(Timer, this, &AMyActorProjectile::DestroySelf, Life, false);
+
+
 	
 }
 
@@ -39,5 +51,28 @@ void AMyActorProjectile::DestroySelf()
 {
 	Destroy();
 }
+
+void AMyActorProjectile::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other,
+	class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal,
+	FVector NormalImpulse, const FHitResult& Hit)
+{
+	
+	// apply damage to the character
+	if (TObjectPtr<APlayerCharacter> FishCharacter = Cast<APlayerCharacter>(Other))
+	{
+
+			UE_LOG(LogTemp, Warning, TEXT("[Bag] NotifyHit fired: Other=%s, MyComp=%s, OtherComp=%s"),
+				*GetNameSafe(Other), *GetNameSafe(MyComp), *GetNameSafe(OtherComp));
+
+			FishCharacter->RemoveFish();
+	}
+
+	
+
+}
+
+
+
+
 
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MyActorProjectile.h"
 #include "GameFramework/Character.h"
 #include "Shootercharacter.generated.h"
 
@@ -41,8 +42,11 @@ protected:
 	float FishSpawnPercentage = 0;
 	ACharacter* Player = nullptr;
 
+	FTimerHandle timerShoot;
 public:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AMyActorProjectile> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* SoundBase;
@@ -53,7 +57,7 @@ public:
 	bool bHit = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
-	bool bCanShoot = false;
+	bool bCanShoot = true;
 
 
 	UFUNCTION()
@@ -70,5 +74,7 @@ public:
 
 	UFUNCTION()
 	void FireProjectile();
+
+	void FacePlayer();
 
 };

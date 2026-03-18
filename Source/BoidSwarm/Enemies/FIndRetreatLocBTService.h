@@ -27,5 +27,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Key")
 	FBlackboardKeySelector RetreatLocKey;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlackBoard")
+	FBlackboardKeySelector PlayerKey;
+
+
 
 };

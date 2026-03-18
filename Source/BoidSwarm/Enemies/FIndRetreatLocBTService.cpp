@@ -13,6 +13,9 @@ void UFIndRetreatLocBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 	AIController = Cast<AEnemyAIController>(OwnerComp.GetAIOwner());
 
 	UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(OwnerComp.GetWorld());
+	AActor* Player = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(PlayerKey.SelectedKeyName));
+
+	
 
 	FNavLocation RandomLoc;
 	if (!Nav->GetRandomReachablePointInRadius(AIController->GetPawn()->GetActorLocation(), 400.0f, RandomLoc))
@@ -20,5 +23,13 @@ void UFIndRetreatLocBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		return;
 	}
 
-	OwnerComp.GetBlackboardComponent()->SetValueAsVector(RetreatLocKey.SelectedKeyName, RandomLoc.Location);
+if (Player)
+	{
+		FVector Dir = (RandomLoc.Location - Player->GetActorLocation()).GetSafeNormal();
+
+	FVector Location = RandomLoc.Location + Dir * 500.0f;
+
+	OwnerComp.GetBlackboardComponent()->SetValueAsVector(RetreatLocKey.SelectedKeyName, Location);
+	}
+	
 }

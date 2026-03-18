@@ -15,6 +15,9 @@ AShootercharacter::AShootercharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ShootLoc = CreateDefaultSubobject<USceneComponent>(TEXT("shootloc"));
+	ShootLoc->SetupAttachment(GetMesh());
+
 }
 
 // Called when the game starts or when spawned
@@ -110,6 +113,7 @@ void AShootercharacter::ProjectileImpact(const FVector& ForwardVector)
 
 void AShootercharacter::Shoot()
 {
+	FacePlayer();
 	if (!bCanShoot)
 	{
 		return;
@@ -119,29 +123,43 @@ void AShootercharacter::Shoot()
 
 	FireProjectile();
 
-	FTimerHandle timer;
-	GetWorld()->GetTimerManager().SetTimer(timer, this, &AShootercharacter::ResetFire, FireRate, false);
+	GetWorld()->GetTimerManager().SetTimer(timerShoot, this, &AShootercharacter::ResetFire, FireRate, false);
 
 }
 
 void AShootercharacter::ResetFire()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ReadyToFire"));
 	bCanShoot = true;
+	GetWorld()->GetTimerManager().ClearTimer(timerShoot);
 }
 
 void AShootercharacter::FireProjectile()
 {
-
-	FVector Start = ShootLoc->GetComponentLocation() + GetActorForwardVector();
+	UE_LOG(LogTemp, Warning, TEXT("Fire"));
+	FVector Start = ShootLoc->GetComponentLocation();
 	FVector Target = Player->GetActorLocation();
 
 	FVector Direction = (Target - Start).GetSafeNormal();
 
 	FActorSpawnParameters Params;
 
-	AMyActorProjectile* bullet = GetWorld()->SpawnActor<AMyActorProjectile>(AMyActorProjectile::StaticClass(), Start, FRotator::ZeroRotator, Params);
+	AMyActorProjectile* bullet = GetWorld()->SpawnActor<AMyActorProjectile>(ProjectileClass, Start, Direction.Rotation(), Params);
 
 	
+}
+
+void AShootercharacter::FacePlayer()
+{
+	FVector Dir = Player->GetActorLocation() - GetActorLocation();
+	Dir.Z = 0;
+
+	if (!Dir.IsNearlyZero())
+	{
+		SetActorRotation(Dir.Rotation());
+	}
+
+
 }
 
 
