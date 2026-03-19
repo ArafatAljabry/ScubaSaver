@@ -70,12 +70,21 @@ void AShootercharacter::Killed()
 	);
 	if (SoundComponent)
 		SoundComponent->Play();
+	GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("outch!")  // Message
+	);
 
 	Destroy();
 }
 
-void AShootercharacter::ProjectileImpact(const FVector& ForwardVector)
+void AShootercharacter::ProjectileImpact()
 {
+	ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode());
+
+
 	if (bHit)
 	{
 		return;
@@ -83,13 +92,13 @@ void AShootercharacter::ProjectileImpact(const FVector& ForwardVector)
 
 	// raise the hit flag
 	bHit = true;
-	//GEngine->AddOnScreenDebugMessage(
-	//	-1,                      // Key (-1 = new line)
-	//	5.f,                     // Display time in seconds
-	//	FColor::Yellow,          // Text color
-	//	TEXT("outch!")  // Message
-	//);
 
+	GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("outch1!")  // Message
+	);
 	// deactivate character movement
 	GetCharacterMovement()->Deactivate();
 
@@ -99,13 +108,13 @@ void AShootercharacter::ProjectileImpact(const FVector& ForwardVector)
 	if (FMath::RandRange(0, 100) <= FishSpawnPercentage)
 	{
 
-		if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
-		{
-			GM->GotFish();
-		}
+		
+		GM->GotFish();
+			
+		
 		
 	}
-
+	GM->DecreaseNPCs();
 	FTimerHandle Timer;
 	// defer destruction
 	GetWorld()->GetTimerManager().SetTimer(Timer, this, &AShootercharacter::Killed, 0.1, false);
@@ -113,6 +122,10 @@ void AShootercharacter::ProjectileImpact(const FVector& ForwardVector)
 
 void AShootercharacter::Shoot()
 {
+	if (bHit)
+	{
+		return;
+	}
 	FacePlayer();
 	if (!bCanShoot)
 	{
@@ -129,24 +142,29 @@ void AShootercharacter::Shoot()
 
 void AShootercharacter::ResetFire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ReadyToFire"));
+	//UE_LOG(LogTemp, Warning, TEXT("ReadyToFire"));
 	bCanShoot = true;
 	GetWorld()->GetTimerManager().ClearTimer(timerShoot);
 }
 
 void AShootercharacter::FireProjectile()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Fire"));
+	//UE_LOG(LogTemp, Warning, TEXT("Fire"));
 	FVector Start = ShootLoc->GetComponentLocation();
 	FVector Target = Player->GetActorLocation();
 
 	FVector Direction = (Target - Start).GetSafeNormal();
 
 	FActorSpawnParameters Params;
+	Params.Owner = this;
+	
 
 	AMyActorProjectile* bullet = GetWorld()->SpawnActor<AMyActorProjectile>(ProjectileClass, Start, Direction.Rotation(), Params);
 
-	
+	if (bullet)
+	{
+		bullet->collider->IgnoreActorWhenMoving(this, true);
+	}
 }
 
 void AShootercharacter::FacePlayer()

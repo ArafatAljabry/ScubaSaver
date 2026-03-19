@@ -36,6 +36,10 @@ void ATwinStickSpawner::BeginPlay()
 	// set up the spawn timer
 	GetWorld()->GetTimerManager().SetTimer(SpawnGroupTimer, this, &ATwinStickSpawner::SpawnNPCGroup, SpawnGroupDelay, true);
 
+	GetWorld()->GetTimerManager().SetTimer(ShooterStarts, this, &ATwinStickSpawner::EnableShooter, 10, false);
+
+	
+
 	// spawn the first group of NPCs
 	SpawnNPCGroup();
 }
@@ -47,26 +51,28 @@ void ATwinStickSpawner::EndPlay(EEndPlayReason::Type EndPlayReason)
 	// clear the spawn timers
 	GetWorld()->GetTimerManager().ClearTimer(SpawnGroupTimer);
 	GetWorld()->GetTimerManager().ClearTimer(SpawnNPCTimer);
+	GetWorld()->GetTimerManager().ClearTimer(ShooterStarts);
 }
 
 void ATwinStickSpawner::SpawnNPCGroup()
 {
-	// reset the group spawn counter
-	SpawnCount = 0;
-
 	// check if we're still under the max NPC cap
 
-	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
-	{
+	SpawnCount = 0;
+	GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode());
+	
 		if (GM->CanSpawnNPCs())
 		{
 			SpawnNPC();
+		
 		}
-	}
+	
 }
 
 void ATwinStickSpawner::SpawnNPC()
 {
+	TSubclassOf<ACharacter> ClassToSpawn = nullptr;
+
 	if (bCanSpawn)
 	{
 		FTransform SpawnTransform;
@@ -79,19 +85,45 @@ void ATwinStickSpawner::SpawnNPC()
 
 			// spawn the NPC
 			//ATwinStickNPC* NPC = GetWorld()->SpawnActor<ATwinStickNPC>(NPCClass, SpawnTransform);
-			if(isBag){ABagCharacter* Bag = GetWorld()->SpawnActor<ABagCharacter>(BagNPCClass, SpawnTransform); }
+			if (isBag)
+			{
+				ClassToSpawn = BagNPCClass;
+			}
+			if (BCanSpawnShooter && bShooter)
+			{
+				ClassToSpawn = ShooterClass;
+			}
+		
+			
+			ACharacter* NewCharacter = GetWorld()->SpawnActor<ACharacter>(ClassToSpawn, SpawnTransform);
+			if (NewCharacter)
+			{
+				GM->IncreaseNPCs();
+			}
+
 			if(isTrawler) { ATrolleyNetActor* Trawler = GetWorld()->SpawnActor<ATrolleyNetActor>(TrawlerNPCClass, SpawnTransform); }
 		}
-		++SpawnCount;
-		// increase the spawn counter
 		
+		// increase the spawn counter
+		SpawnCount++;
 
-		// do we still have enemies left to spawn?
-		if (SpawnCount < SpawnGroupSize)
-		{
-			GetWorld()->GetTimerManager().SetTimer(SpawnNPCTimer, this, &ATwinStickSpawner::SpawnNPC, FMath::RandRange(MinSpawnDelay, MaxSpawnDelay), false);
-		}
+		
 	}
 	
+	if (SpawnCount < SpawnGroupSize)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			SpawnNPCTimer,
+			this,
+			&ATwinStickSpawner::SpawnNPC,
+			FMath::RandRange(MinSpawnDelay, MaxSpawnDelay),
+			false
+		);
+	}
+}
 
+void ATwinStickSpawner::EnableShooter()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Shooters"));
+	BCanSpawnShooter = true;
 }

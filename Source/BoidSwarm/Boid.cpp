@@ -9,6 +9,8 @@
 #include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Enemies/BagCharacter.h"
+#include "Enemies/MyActorProjectile.h"
+#include "Enemies/Shootercharacter.h"
 #include "Engine/Engine.h" //debug messages
 #include "Kismet/GameplayStatics.h"
 
@@ -430,6 +432,18 @@ void ABoid::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp,
 				BagNpc->ProjectileImpact(GetActorForwardVector());
 			}
 
+			if (AShootercharacter* shooter = Cast<AShootercharacter>(OverlapActor))
+			{
+				updateHealth(-100);
+				shooter->ProjectileImpact();
+			}
+
+			if (AMyActorProjectile* bullet = Cast<AMyActorProjectile>(OverlapActor))
+			{
+				updateHealth(-25);
+				bullet->hit = true;
+			}
+
 			if (ABoid* OtherBoid = Cast<ABoid>(OverlapActor))
 			{
 				OverlappingBoids.Add(OtherBoid);
@@ -440,6 +454,7 @@ void ABoid::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp,
 
 			if (ATrolleyNetActor* Trolley = Cast<ATrolleyNetActor>(OverlapActor)) {
 				updateHealth(Trolley->damage); //Deal damage to boids :<
+				Trolley->Destroy();
 			}
 
 
