@@ -59,12 +59,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
 	bool bCanShoot = true;
 
+	
+
 
 	UFUNCTION()
 	void Killed();
 
 	UFUNCTION()
-	void ProjectileImpact(const FVector& ForwardVector);
+	void ProjectileImpact();
 
 	UFUNCTION()
 	void Shoot();

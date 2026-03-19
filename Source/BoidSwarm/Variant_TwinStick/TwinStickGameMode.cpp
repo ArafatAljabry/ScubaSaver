@@ -57,6 +57,7 @@ void ATwinStickGameMode::Tick(float DeltaSeconds)
 		}
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Count: %d"),NPCCount);
 	FindClosestSpawners();
 }
 

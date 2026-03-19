@@ -94,7 +94,7 @@ void ABagCharacter::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, 
 
 void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 {
-
+	ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode());
 	// only handle damage if we haven't been hit yet
 	if (bHit)
 	{
@@ -126,15 +126,12 @@ void ABagCharacter::ProjectileImpact(const FVector& ForwardVector)
 		//	TEXT("im busting")  // Message
 		//);
 
-
-
-		if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
-		{
-			GM->GotFish();
-		}
+		GM->GotFish();
+		
 		//ATwinStickPickup* Pickup = GetWorld()->SpawnActor<ATwinStickPickup>(PickupClass, GetActorTransform());
 	}
-
+	
+	GM->DecreaseNPCs();
 	// spawn the NPC destruction proxy
 	//ATwinStickNPCDestruction* DestructionProxy = GetWorld()->SpawnActor<ATwinStickNPCDestruction>(DestructionProxyClass, GetActorTransform());
 

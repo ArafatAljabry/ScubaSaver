@@ -29,11 +29,17 @@ public:
 	UStaticMeshComponent* mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Life = 3;
+	float Life = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "variables")
 	USphereComponent* collider;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* SoundBase;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAudioComponent* SoundComponent;
 
+	bool hit = false;
+	
 	UFUNCTION()
 	void DestroySelf();
 
@@ -41,8 +47,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileMovement")
 	class UProjectileMovementComponent* ProjectileMovement;
 
-	virtual void NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-
-
-
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

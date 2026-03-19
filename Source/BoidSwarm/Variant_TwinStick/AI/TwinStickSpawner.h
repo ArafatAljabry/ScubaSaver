@@ -7,6 +7,7 @@
 #include "TwinStickNPC.h"
 #include "Variant_TwinStick/AI/TrolleyNetActor.h"
 #include "Enemies/BagCharacter.h"
+#include "Enemies/Shootercharacter.h"
 #include "TwinStickSpawner.generated.h"
 
 class ARecastNavMesh;
@@ -41,7 +42,7 @@ protected:
 
 	/** Time delay between enemy group spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20, Units = "s"))
-	float SpawnGroupDelay = 3.0f;
+	float SpawnGroupDelay = 0.5f;
 
 	/** Min time delay between individual NPC spawns */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 2, Units = "s"))
@@ -53,7 +54,7 @@ protected:
 
 	/** Radius around the spawner where it can spawn NPCs */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 20000, Units = "cm"))
-	float SpawnRadius = 1000.0f;
+	float SpawnRadius = 200.0f;
 
 	/** Number of NPCs to spawn per group */
 	UPROPERTY(EditAnywhere, Category="NPC Spawner", meta = (ClampMin = 0, ClampMax = 10))
@@ -70,6 +71,20 @@ protected:
 
 	/** Pointer to the recast nav mesh actor, used to provide NPC spawn locations */
 	TObjectPtr<ARecastNavMesh> NavData;
+
+	//
+	FTimerHandle ShooterStarts;
+
+	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
+	TSubclassOf<AShootercharacter> ShooterClass;
+
+	bool BCanSpawnShooter = false;
+
+	UPROPERTY(EditAnywhere, Category = "NPC Spawner")
+	bool bShooter = false;
+
+	UPROPERTY()
+	class ATwinStickGameMode* GM;
 
 public:	
 
@@ -95,5 +110,9 @@ protected:
 
 	/** Spawns an individual NPC */
 	void SpawnNPC();
+
+	void EnableShooter();
+
+	
 
 };
