@@ -28,8 +28,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Twin Stick")
 	TSubclassOf<UPlayerWidget> UIWidgetClass;
 
+	/** Type of UI Widget to spawn */
+	UPROPERTY(EditAnywhere, Category = "Twin Stick")
+	TSubclassOf<UUserWidget> UIWidgetPauseClass;
 	/** Pointer to the spawned UI Widget */
 	TObjectPtr<UPlayerWidget> UIWidget;
+	/** Pointer to the spawned UI Widget */
+	TObjectPtr<UUserWidget> EndGameWidget;
 
 	/** Current game score */
 	int32 Score = 0;
@@ -81,7 +86,12 @@ protected:
 	USoundBase* SoundBase;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAudioComponent* SoundComponent;
+	
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* EndGameMusic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAudioComponent* EndGameMusicComponent;
 public:
 
 	/** Gameplay initialization */

@@ -125,8 +125,8 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 		const FVector SpawnLocation =
 			spawnOrigin + FVector(
 				FMath::FRandRange(-radius, radius),
-				FMath::FRandRange(-radius, radius),
-				FMath::FRandRange(-radius/2, radius/2)
+				0,
+				FMath::FRandRange(-radius, radius)
 			);
 
 		const FRotator SpawnRot(RandomPitch(),RandomYaw(), RandomRoll());
@@ -138,7 +138,7 @@ void ATwinStickCharacter::SpawnBoids(int Count)
 			continue;
 		}
 
-		EachBoid->spawner = this;
+		EachBoid->Player = this;
 		EachBoid->Center = spawnOrigin;
 
 		Boids.Add(EachBoid);
@@ -161,19 +161,33 @@ void ATwinStickCharacter::DeleteBoidFromArray(ABoid* Boid)
 	{
 		return;
 	}
-	if (ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode()))
+	ATwinStickGameMode* GM = Cast<ATwinStickGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM)
 	{
+		Boids.RemoveSingleSwap(Boid);
 		GM->LostFish();
+		Boid->Destroy();
 	}
-	Boids.RemoveSingleSwap(Boid);
-
 }
 
 
 void ATwinStickCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//Start background music
+	if (BackgroundMusic)
+	{
+		MusicComponent = UGameplayStatics::SpawnSound2D(
+			GetWorld(),
+			BackgroundMusic,
+			1.0f,
+			1.0f,
+			0.0f,
+			nullptr,
+			true,   // persist
+			false
+		);
+	}
 	// update the items count
 	UpdateItems();
 
@@ -266,14 +280,6 @@ void ATwinStickCharacter::NotifyControllerChanged()
 
 void ATwinStickCharacter::Pause()
 {
-	if (isPaused)
-		return;
-	ShowPauseMenu();
-	
-}
-
-void ATwinStickCharacter::ShowPauseMenu()
-{
 	// Create widget if it doesn't exist
 	if (!PauseMenuWidget && PauseMenuWidgetClass)
 	{
@@ -305,31 +311,26 @@ void ATwinStickCharacter::ShowPauseMenu()
 			PlayerController->SetShowMouseCursor(true);
 
 		}
-
-		// Pause the game
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-
 		//Audio 
-		if (PauseMenuMusic)
+		if (MusicComponent)
 		{
-			//Create the component
-			PauseMenuMusicComponent = UGameplayStatics::SpawnSound2D(
-				this,
-				PauseMenuMusic,
-				1.0f,      // Volume
-				1.0f,      // Pitch
-				0.0f,      // Start time
-				nullptr,   // Concurrency
-				true,      // Persist
-				false      // Don't auto destroy
-			);
-			if (PauseMenuMusicComponent)
-				MusicComponent->SetPaused(true);
-				PauseMenuMusicComponent->Play();
+			MusicComponent->SetPaused(true);
 		}
 
+		if (PauseMenuMusic)
+		{
+			PauseMenuMusicComponent = UGameplayStatics::SpawnSound2D(
+				GetWorld(),
+				PauseMenuMusic
+			);
 
+			if (PauseMenuMusicComponent)
+			{
+				PauseMenuMusicComponent->bIsUISound = true; // plays while paused
+			}
+		}
 
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
 
 		isPaused = true;
 	}
@@ -649,3 +650,17 @@ void ATwinStickCharacter::ResetAutoFire()
 	bAutoFireActive = false;
 }
 
+void ATwinStickCharacter::UnpauseGame()
+{
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+	if (MusicComponent)
+	{
+		MusicComponent->SetPaused(false);
+	}
+
+	if (PauseMenuMusicComponent)
+	{
+		PauseMenuMusicComponent->Stop();
+	}
+}

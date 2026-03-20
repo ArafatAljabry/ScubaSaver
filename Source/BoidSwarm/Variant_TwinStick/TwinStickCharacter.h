@@ -156,7 +156,6 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="UiS")
 	bool isPaused{false};
 	void Pause();
-	void ShowPauseMenu();
 	void HidePauseMenu();
 	
 	/** Updates the character's rotation to face the aim direction */
@@ -166,7 +165,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	//The actual song
-	UPROPERTY(BlueprintReadWrite, Category = "Audio")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Audio")
 	USoundBase* BackgroundMusic;
 	//Component playing it
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Audio")
@@ -225,6 +224,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	void DoAoEAttack();
 
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void UnpauseGame();
 public:
 
 	/** Applies collision impact to the player */

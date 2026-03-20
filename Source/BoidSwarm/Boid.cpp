@@ -75,29 +75,28 @@ void ABoid::updateHealth(float num)
 {
 	float newHealth = health + num;
 	health = FMath::Clamp(newHealth, 0.f, maxHealth);
-	if (health == 0)
+	if (health <= 0)
 	{
 
 		//Play sound
-		if (!DeathSound)
+		if (DeathSound)
 		{
-			return;
+			//Create the component
+			DeathAudioComp = UGameplayStatics::SpawnSound2D(
+				this,
+				DeathSound,
+				1.0f,      // Volume
+				1.0f,      // Pitch
+				0.0f,      // Start time
+				nullptr,   // Concurrency
+				true,      // Persist
+				false      // Don't auto destroy
+			);
 		}
-		//Create the component
-		DeathAudioComp = UGameplayStatics::SpawnSound2D(
-			this,
-			DeathSound,
-			1.0f,      // Volume
-			1.0f,      // Pitch
-			0.0f,      // Start time
-			nullptr,   // Concurrency
-			true,      // Persist
-			false      // Don't auto destroy
-		);
+		
 		if (DeathAudioComp)
 			DeathAudioComp->Play();
-		spawner->DeleteBoidFromArray(this);
-		Destroy();
+		Player->DeleteBoidFromArray(this);
 	}
 
 	
@@ -119,9 +118,9 @@ void ABoid::BeginPlay()
 	AllBoids.Add(this);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoid::OnCapsuleBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ABoid::OnCapsuleEndOverlap);
-	if (spawner == nullptr) return;
-	Radius = FVector(spawner->radius, spawner->radius, spawner->radius / 2.0f);
-	Center = spawner->spawnOrigin;
+	if (Player == nullptr) return;
+	Radius = FVector(Player->radius, Player->radius, Player->radius / 2.0f);
+	Center = Player->spawnOrigin;
 
 	PersonalOffset = FVector(
 		FMath::FRandRange(-Radius.X * 0.3f, Radius.X * 0.3f),
@@ -233,12 +232,12 @@ void ABoid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!spawner) return;
+	if (!Player) return;
 
 	
 	if (Radius == FVector::ZeroVector || Center == FVector::ZeroVector) {
-		if (spawner == nullptr) return;
-		Radius = FVector(spawner->radius, spawner->radius, spawner->radius / 2.0f);
+		if (Player == nullptr) return;
+		Radius = FVector(Player->radius, Player->radius, Player->radius / 2.0f);
 	}
 
 
@@ -254,7 +253,7 @@ void ABoid::Tick(float DeltaTime)
 	{
 		isTurning = true;
 		/*	 To player :
-		FVector direction = spawner->GetActorLocation() - GetActorLocation();
+		FVector direction = Player->GetActorLocation() - GetActorLocation();
 
 		FQuat rotationWhileTurning = FQuat::Slerp(
 			GetActorRotation().Quaternion(), 
@@ -454,7 +453,7 @@ void ABoid::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp,
 
 			if (ATrolleyNetActor* Trolley = Cast<ATrolleyNetActor>(OverlapActor)) {
 				updateHealth(Trolley->damage); //Deal damage to boids :<
-				Trolley->Destroy();
+				//Trolley->Destroy();-> trolleys should not get destroyed. They get cleaned up later anyways by a different system
 			}
 
 

@@ -102,7 +102,7 @@ public:
 
 	//TODO : make variables that shouldn't be stored in every Boid individualy static
 
-	ATwinStickCharacter* spawner;
+	ATwinStickCharacter* Player;
 	FVector Center;
 	FVector Radius;
 

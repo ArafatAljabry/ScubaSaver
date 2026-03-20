@@ -219,7 +219,7 @@ void ATwinStickGameMode::GameOver()
 		EndGameWidget->AddToViewport();
 	}
 
-	/* Music is already added on construct on the blueprint end
+
 	EndGameMusicComponent = UGameplayStatics::SpawnSound2D(
 		this,
 		EndGameMusic,
@@ -231,7 +231,7 @@ void ATwinStickGameMode::GameOver()
 		false      // Don't auto destroy
 	);
 	if (EndGameMusicComponent)
-		EndGameMusicComponent->Play();*/
+		EndGameMusicComponent->Play();
 	// Enable mouse + UI input
 	FInputModeUIOnly InputMode;
 	InputMode.SetWidgetToFocus(EndGameWidget->TakeWidget());
