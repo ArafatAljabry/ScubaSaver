@@ -122,21 +122,17 @@ void AShootercharacter::ProjectileImpact()
 
 void AShootercharacter::Shoot()
 {
-	if (bHit)
-	{
-		return;
-	}
 	FacePlayer();
-	if (!bCanShoot)
+
+	if (bCanShoot)
 	{
-		return;
+		bCanShoot = false;
+		AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				FireProjectile();
+			});
+		GetWorld()->GetTimerManager().SetTimer(timerShoot, this, &AShootercharacter::ResetFire, FireRate, false);
 	}
-
-	bCanShoot = false;
-
-	FireProjectile();
-
-	GetWorld()->GetTimerManager().SetTimer(timerShoot, this, &AShootercharacter::ResetFire, FireRate, false);
 
 }
 
@@ -160,6 +156,12 @@ void AShootercharacter::FireProjectile()
 	
 
 	AMyActorProjectile* bullet = GetWorld()->SpawnActor<AMyActorProjectile>(ProjectileClass, Start, Direction.Rotation(), Params);
+	GEngine->AddOnScreenDebugMessage(
+		-1,                      // Key (-1 = new line)
+		5.f,                     // Display time in seconds
+		FColor::Yellow,          // Text color
+		TEXT("Projectile made!")  // Message
+	);
 
 	if (bullet)
 	{

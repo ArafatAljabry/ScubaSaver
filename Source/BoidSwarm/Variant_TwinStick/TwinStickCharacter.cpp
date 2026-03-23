@@ -175,17 +175,20 @@ void ATwinStickCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	//Start background music
-	if (BackgroundMusic)
+	FString LevelName = GetWorld()->GetMapName();
+	LevelName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+
+	if (LevelName != "MainMenu" && BackgroundMusic)
 	{
 		MusicComponent = UGameplayStatics::SpawnSound2D(
 			GetWorld(),
 			BackgroundMusic,
-			1.0f,
-			1.0f,
-			0.0f,
+			1.0f,  // Volume
+			1.0f,  // Pitch
+			0.0f,  // Start time
 			nullptr,
-			true,   // persist
-			false
+			true,  // Persist
+			false  // Don't auto destroy
 		);
 	}
 	// update the items count

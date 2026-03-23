@@ -17,6 +17,12 @@ ATwinStickGameMode::ATwinStickGameMode()
 
 void ATwinStickGameMode::BeginPlay()
 {
+	FString LevelName = GetWorld()->GetMapName();
+	LevelName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+
+	if (LevelName != "MainMenu" )
+	{
+	
 	// create the UI widget and add it to the viewport
 	UIWidget = CreateWidget<UPlayerWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UIWidgetClass);
 	UIWidget->AddToViewport(0);
@@ -35,6 +41,7 @@ void ATwinStickGameMode::BeginPlay()
 
 	FTimerHandle timer;
 	GetWorld()->GetTimerManager().SetTimer(timer, this, &ATwinStickGameMode::UpdateFishNumber, 1, false);
+	}
 }
 
 void ATwinStickGameMode::Tick(float DeltaSeconds)
